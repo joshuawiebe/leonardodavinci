@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leonardo da Vinci</title>
+    <style>
+        /* Future-forward design system with artistic elements */
+        :root {
+            --bg: #fefefe;
+            --text: #0d0d0d;
+            --text-muted: #525252;
+            --accent: #000000;
+            --border: #e4e4e4;
+            --hover: #f7f7f7;
+            --glass: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.04);
+            --gradient: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --text: #f5f5f5;
+            --text-muted: #9a9a9a;
+            --accent: #ffffff;
+            --border: #1a1a1a;
+            --hover: #111111;
+            --glass: rgba(0, 0, 0, 0.3);
+            --shadow: rgba(255, 255, 255, 0.02);
+            --gradient: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Artistic background elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 226, 0.03) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Page loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-content {
+            text-align: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loader-text {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        /* Navigation - fixed navbar styling bug */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.5rem 2rem;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            background: var(--glass);
+        }
+
+        .nav.scrolled {
+            background: var(--bg);
+            border-bottom-color: var(--border);
+            box-shadow: 0 1px 20px var(--shadow);
+        }
+
+        [data-theme="dark"] .nav {
+            background: rgba(10, 10, 10, 0.8);
+        }
+
+        [data-theme="dark"] .nav.scrolled {
+            background: var(--bg);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 400;
+            font-size: 1rem;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2s forwards;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+            position: relative;
+        }
+
+        .nav-link:nth-child(1) { animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2.1s forwards; }
+        .nav-link:nth-child(2) { animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2.2s forwards; }
+        .nav-link:nth-child(3) { animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2.3s forwards; }
+        .nav-link:nth-child(4) { animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2.4s forwards; }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .settings-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2.5s forwards;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-btn:hover {
+            background: var(--hover);
+            transform: translateY(-1px);
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .settings-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .settings-modal.active .settings-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--accent);
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: var(--hover);
+            color: var(--accent);
+        }
+
+        .setting-group {
+            margin-bottom: 2rem;
+        }
+
+        .setting-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .theme-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .theme-option {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: none;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .theme-option:hover {
+            background: var(--hover);
+            transform: translateY(-1px);
+        }
+
+        .theme-option.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .lang-option {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: none;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .lang-option:hover {
+            background: var(--hover);
+            transform: translateY(-1px);
+        }
+
+        .lang-option.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .lang-name {
+            display: block;
+            font-weight: 500;
+        }
+
+        .lang-code {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 0.2rem;
+        }
+
+        /* Hero section - split layout */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 4rem;
+            padding: 0 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero-content {
+            padding: 2rem 0;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 7vw, 6rem);
+            font-weight: 200;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateX(-50px) rotateX(10deg);
+            animation: slideInLeft 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.5s forwards;
+        }
+
+        .hero-dates {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            font-weight: 300;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateX(-30px);
+            animation: slideInLeft 1s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards;
+            font-style: italic;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            max-width: 90%;
+            opacity: 0;
+            transform: translateX(-30px);
+            animation: slideInLeft 1s cubic-bezier(0.23, 1, 0.32, 1) 1.1s forwards;
+        }
+
+        .hero-image-container {
+            position: relative;
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(50px) scale(0.9);
+            animation: slideInRight 1.4s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 70vh;
+            border-radius: 20px;
+            object-fit: cover;
+            filter: grayscale(30%) contrast(1.1);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 
+                0 25px 50px -12px var(--shadow),
+                0 0 0 1px var(--border);
+        }
+
+        .hero-image:hover {
+            filter: grayscale(0%) contrast(1.2);
+            transform: scale(1.02) rotate(-0.5deg);
+        }
+
+        /* Artistic decorative elements */
+        .hero-image-container::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 100px;
+            height: 100px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-image-container::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            opacity: 0.4;
+            animation: morph 8s ease-in-out infinite;
+        }
+
+        /* Content sections with modern artistic touches */
+        .section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 200;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 5rem;
+            opacity: 0;
+            transform: translateY(40px);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0.6;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+
+        .content-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -15px var(--shadow);
+        }
+
+        .content-card:hover::before {
+            opacity: 0.3;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            letter-spacing: -0.01em;
+        }
+
+        .card-text {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Timeline with modern styling */
+        .timeline {
+            margin-top: 5rem;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 100px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+            opacity: 0.5;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 100px;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .year {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        .timeline-content h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 0.8rem;
+            color: var(--accent);
+        }
+
+        .timeline-content p {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0) rotateX(0deg);
+            }
+        }
+
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 968px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+                padding: 6rem 1rem 2rem;
+            }
+
+            .hero-image-container {
+                order: -1;
+                height: 60vh;
+            }
+
+            .hero-image {
+                height: 50vh;
+            }
+
+            .section {
+                padding: 6rem 1rem;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding-left: 3rem;
+            }
+
+            .timeline-item::before {
+                left: 20px;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection styling */
+        ::selection {
+            background: var(--accent);
+            color: var(--bg);
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Page loader -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="loader-text">Leonardo da Vinci</div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="logo">Leonardo da Vinci</a>
+            <div class="nav-links">
+                <a href="#biography" class="nav-link">Biography</a>
+                <a href="#inventions" class="nav-link">Inventions</a>
+                <a href="#art" class="nav-link">Art</a>
+                <a href="#legacy" class="nav-link">Legacy</a>
+                <button class="settings-btn" id="settingsBtn">
+                    <span>⚙️</span>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Leonardo<br>da Vinci</h1>
+            <p class="hero-dates">1452 — 1519</p>
+            <p class="hero-desc">
+                Renaissance polymath who embodied the fusion of art, science, and innovation. 
+                A visionary whose notebooks contained designs for flying machines, anatomical studies, 
+                and masterpieces that continue to inspire humanity five centuries later.
+            </p>
+        </div>
+        <div class="hero-image-container">
+            <img src="https://quadro.burda-forward.de/ctf/ca3d91ba-ccd9-4802-9411-3f757f5ae585.92cf90ef-0400-4eda-a475-9afbf8d01f64.jpeg?im=RegionOfInterestCrop%3D%28992%2C558%29%2CregionOfInterest%3D%28750%2C500%29&hash=5c824d02ea70e8d06955d813d300e8abf96c09e24d9d2db8433c41e95bd4b5b7" 
+                 alt="Leonardo da Vinci" class="hero-image">
+        </div>
+    </section>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h3 class="settings-title">Settings</h3>
+                <button class="close-btn" id="closeSettings">×</button>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Theme</label>
+                <div class="theme-options">
+                    <button class="theme-option" data-theme="light">
+                        <span>☀️</span>
+                        <span>Light</span>
+                    </button>
+                    <button class="theme-option" data-theme="dark">
+                        <span>🌙</span>
+                        <span>Dark</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Language</label>
+                <div class="language-grid">
+                    <button class="lang-option" data-lang="en">
+                        <span class="lang-name">English</span>
+                        <span class="lang-code">EN</span>
+                    </button>
+                    <button class="lang-option" data-lang="es">
+                        <span class="lang-name">Español</span>
+                        <span class="lang-code">ES</span>
+                    </button>
+                    <button class="lang-option" data-lang="fr">
+                        <span class="lang-name">Français</span>
+                        <span class="lang-code">FR</span>
+                    </button>
+                    <button class="lang-option" data-lang="de">
+                        <span class="lang-name">Deutsch</span>
+                        <span class="lang-code">DE</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biography Section -->
+    <section id="biography" class="section">
+        <h2 class="section-title">Biography</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="year">1452</div>
+                <div class="timeline-content">
+                    <h3>Birth in Vinci</h3>
+                    <p>Born on April 15 in the hilltop town of Vinci, Republic of Florence. The illegitimate son of a successful notary and a local woman, marking the beginning of an extraordinary life.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1466</div>
+                <div class="timeline-content">
+                    <h3>Apprenticeship Begins</h3>
+                    <p>At age 14, became apprentice to the renowned artist Andrea del Verrocchio in Florence, learning painting, sculpture, metalwork, and mechanical arts in one of the city's most prestigious workshops.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1482</div>
+                <div class="timeline-content">
+                    <h3>Milan Court</h3>
+                    <p>Moved to Milan under the patronage of Ludovico Sforza, where he served as court artist, engineer, and inventor, creating military designs, architectural plans, and court entertainments.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1503</div>
+                <div class="timeline-content">
+                    <h3>The Mona Lisa</h3>
+                    <p>Began work on his most famous portrait, revolutionizing the art of painting with innovative techniques and psychological depth that continue to captivate viewers worldwide.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1519</div>
+                <div class="timeline-content">
+                    <h3>Final Chapter</h3>
+                    <p>Died on May 2 at Château du Clos Lucé in Amboise, France, under the patronage of King Francis I, leaving behind thousands of pages of notes and drawings that revealed his genius to the world.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inventions Section -->
+    <section id="inventions" class="section">
+        <h2 class="section-title">Inventions</h2>
+        <div class="content-grid">
+            <div class="content-card">
+                <h3 class="card-title">Aerial Screw</h3>
+                <p class="card-text">
+                    Designed a helicopter-like flying machine with a helical rotor, demonstrating his understanding of aerodynamics centuries before powered flight became reality.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Armored Tank</h3>
+                <p class="card-text">
+                    Conceptualized a mobile fortress powered by cranks, featuring armor plating and gun ports—essentially the first tank design in history.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Parachute Design</h3>
+                <p class="card-text">
+                    Created a pyramid-shaped parachute made of linen, which modern testing has proven to be remarkably effective and safe for descent.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Robotic Knight</h3>
+                <p class="card-text">
+                    Built a mechanical automaton that could sit, stand, and move its arms independently, representing pioneering work in robotics and automation.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Hydraulic Systems</h3>
+                <p class="card-text">
+                    Designed complex water management systems including canals, locks, and irrigation networks that influenced civil engineering for generations.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Multi-Level Bridge</h3>
+                <p class="card-text">
+                    Proposed innovative bridge designs with multiple levels for different types of traffic, anticipating modern urban planning concepts.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Art Section -->
+    <section id="art" class="section">
+        <h2 class="section-title">Masterworks</h2>
+        <div class="content-grid">
+            <div class="content-card">
+                <h3 class="card-title">Mona Lisa</h3>
+                <p class="card-text">
+                    The world's most famous portrait, showcasing sfumato technique and enigmatic expression. Housed in the Louvre, it represents the pinnacle of Renaissance portraiture.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">The Last Supper</h3>
+                <p class="card-text">
+                    Revolutionary fresco depicting Christ's final meal with mathematical precision in perspective and profound emotional narrative, despite its deteriorating condition.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Vitruvian Man</h3>
+                <p class="card-text">
+                    Iconic drawing demonstrating ideal human proportions, perfectly embodying Renaissance fusion of art, mathematics, and scientific observation.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Lady with an Ermine</h3>
+                <p class="card-text">
+                    Portrait of Cecilia Gallerani showcasing innovative three-quarter pose and masterful rendering of light, texture, and psychological presence.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Legacy Section -->
+    <section id="legacy" class="section">
+        <h2 class="section-title">Legacy</h2>
+        <div class="content-grid">
+            <div class="content-card">
+                <h3 class="card-title">Scientific Method</h3>
+                <p class="card-text">
+                    His approach of observation, hypothesis, and experimentation laid crucial groundwork for modern scientific methodology and empirical research practices.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Interdisciplinary Innovation</h3>
+                <p class="card-text">
+                    Demonstrated how art and science could complement each other, inspiring today's approach to creative problem-solving across multiple fields.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Anatomical Revolution</h3>
+                <p class="card-text">
+                    His detailed dissections and drawings advanced medical understanding, establishing artistic documentation as a tool for scientific discovery.
+                </p>
+            </div>
+            <div class="content-card">
+                <h3 class="card-title">Modern Inspiration</h3>
+                <p class="card-text">
+                    Continues to inspire contemporary artists, engineers, and inventors worldwide, representing the ideal of lifelong learning and boundless curiosity.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Multi-language content system with settings labels
+        const translations = {
+            en: {
+                // Settings
+                settings: "Settings",
+                theme: "Theme",
+                language: "Language",
+                light: "Light",
+                dark: "Dark",
+                // Navigation
+                biography: "Biography",
+                inventions: "Inventions", 
+                art: "Art",
+                legacy: "Legacy",
+                // Hero section
+                heroTitle: "Leonardo<br>da Vinci",
+                heroDates: "1452 — 1519",
+                heroDesc: "Renaissance polymath who embodied the fusion of art, science, and innovation. A visionary whose notebooks contained designs for flying machines, anatomical studies, and masterpieces that continue to inspire humanity five centuries later.",
+                // Biography section
+                biographyTitle: "Biography",
+                birth1452: "Birth in Vinci",
+                birthDesc: "Born on April 15 in the hilltop town of Vinci, Republic of Florence. The illegitimate son of a successful notary and a local woman, marking the beginning of an extraordinary life.",
+                apprentice1466: "Apprenticeship Begins",
+                apprenticeDesc: "At age 14, became apprentice to the renowned artist Andrea del Verrocchio in Florence, learning painting, sculpture, metalwork, and mechanical arts in one of the city's most prestigious workshops.",
+                milan1482: "Milan Court",
+                milanDesc: "Moved to Milan under the patronage of Ludovico Sforza, where he served as court artist, engineer, and inventor, creating military designs, architectural plans, and court entertainments.",
+                mona1503: "The Mona Lisa",
+                monaDesc: "Began work on his most famous portrait, revolutionizing the art of painting with innovative techniques and psychological depth that continue to captivate viewers worldwide.",
+                death1519: "Final Chapter",
+                deathDesc: "Died on May 2 at Château du Clos Lucé in Amboise, France, under the patronage of King Francis I, leaving behind thousands of pages of notes and drawings that revealed his genius to the world.",
+                // Inventions section
+                inventionsTitle: "Inventions",
+                aerialScrew: "Aerial Screw",
+                aerialDesc: "Designed a helicopter-like flying machine with a helical rotor, demonstrating his understanding of aerodynamics centuries before powered flight became reality.",
+                armoredTank: "Armored Tank", 
+                tankDesc: "Conceptualized a mobile fortress powered by cranks, featuring armor plating and gun ports—essentially the first tank design in history.",
+                parachute: "Parachute Design",
+                parachuteDesc: "Created a pyramid-shaped parachute made of linen, which modern testing has proven to be remarkably effective and safe for descent.",
+                robotKnight: "Robotic Knight",
+                robotDesc: "Built a mechanical automaton that could sit, stand, and move its arms independently, representing pioneering work in robotics and automation.",
+                hydraulic: "Hydraulic Systems",
+                hydraulicDesc: "Designed complex water management systems including canals, locks, and irrigation networks that influenced civil engineering for generations.",
+                bridge: "Multi-Level Bridge",
+                bridgeDesc: "Proposed innovative bridge designs with multiple levels for different types of traffic, anticipating modern urban planning concepts.",
+                // Art section
+                artTitle: "Masterworks",
+                monaLisa: "Mona Lisa",
+                monaArtDesc: "The world's most famous portrait, showcasing sfumato technique and enigmatic expression. Housed in the Louvre, it represents the pinnacle of Renaissance portraiture.",
+                lastSupper: "The Last Supper",
+                supperDesc: "Revolutionary fresco depicting Christ's final meal with mathematical precision in perspective and profound emotional narrative, despite its deteriorating condition.",
+                vitruvian: "Vitruvian Man",
+                vitruvianDesc: "Iconic drawing demonstrating ideal human proportions, perfectly embodying Renaissance fusion of art, mathematics, and scientific observation.",
+                ladyErmine: "Lady with an Ermine",
+                ermineDesc: "Portrait of Cecilia Gallerani showcasing innovative three-quarter pose and masterful rendering of light, texture, and psychological presence.",
+                // Legacy section
+                legacyTitle: "Legacy",
+                scientific: "Scientific Method",
+                scientificDesc: "His approach of observation, hypothesis, and experimentation laid crucial groundwork for modern scientific methodology and empirical research practices.",
+                interdisciplinary: "Interdisciplinary Innovation",
+                interDesc: "Demonstrated how art and science could complement each other, inspiring today's approach to creative problem-solving across multiple fields.",
+                anatomical: "Anatomical Revolution",
+                anatomicalDesc: "His detailed dissections and drawings advanced medical understanding, establishing artistic documentation as a tool for scientific discovery.",
+                modern: "Modern Inspiration",
+                modernDesc: "Continues to inspire contemporary artists, engineers, and inventors worldwide, representing the ideal of lifelong learning and boundless curiosity."
+            },
+            es: {
+                // Settings
+                settings: "Configuración",
+                theme: "Tema",
+                language: "Idioma",
+                light: "Claro",
+                dark: "Oscuro",
+                // Navigation
+                biography: "Biografía",
+                inventions: "Inventos",
+                art: "Arte", 
+                legacy: "Legado",
+                // Hero section
+                heroTitle: "Leonardo<br>da Vinci",
+                heroDates: "1452 — 1519",
+                heroDesc: "Polímata renacentista que encarnó la fusión del arte, la ciencia y la innovación. Un visionario cuyos cuadernos contenían diseños de máquinas voladoras, estudios anatómicos y obras maestras que continúan inspirando a la humanidad cinco siglos después.",
+                // Biography section
+                biographyTitle: "Biografía",
+                birth1452: "Nacimiento en Vinci",
+                birthDesc: "Nació el 15 de abril en la ciudad montañosa de Vinci, República de Florencia. Hijo ilegítimo de un notario exitoso y una mujer local, marcando el comienzo de una vida extraordinaria.",
+                apprentice1466: "Comienza el Aprendizaje",
+                apprenticeDesc: "A los 14 años, se convirtió en aprendiz del renombrado artista Andrea del Verrocchio en Florencia, aprendiendo pintura, escultura, metalurgia y artes mecánicas en uno de los talleres más prestigiosos de la ciudad.",
+                milan1482: "Corte de Milán",
+                milanDesc: "Se trasladó a Milán bajo el patrocinio de Ludovico Sforza, donde sirvió como artista de la corte, ingeniero e inventor, creando diseños militares, planos arquitectónicos y entretenimientos cortesanos.",
+                mona1503: "La Mona Lisa",
+                monaDesc: "Comenzó a trabajar en su retrato más famoso, revolucionando el arte de la pintura con técnicas innovadoras y profundidad psicológica que continúan cautivando a espectadores de todo el mundo.",
+                death1519: "Capítulo Final",
+                deathDesc: "Murió el 2 de mayo en el Château du Clos Lucé en Amboise, Francia, bajo el patrocinio del Rey Francisco I, dejando atrás miles de páginas de notas y dibujos que revelaron su genio al mundo.",
+                // Inventions section
+                inventionsTitle: "Inventos",
+                aerialScrew: "Tornillo Aéreo",
+                aerialDesc: "Diseñó una máquina voladora similar a un helicóptero con un rotor helicoidal, demostrando su comprensión de la aerodinámica siglos antes de que el vuelo motorizado se hiciera realidad.",
+                armoredTank: "Tanque Blindado",
+                tankDesc: "Conceptualizó una fortaleza móvil propulsada por manivelas, con blindaje y puertos de disparo: esencialmente el primer diseño de tanque en la historia.",
+                parachute: "Diseño de Paracaídas",
+                parachuteDesc: "Creó un paracaídas en forma de pirámide hecho de lino, que las pruebas modernas han demostrado que es notablemente efectivo y seguro para el descenso.",
+                robotKnight: "Caballero Robótico",
+                robotDesc: "Construyó un autómata mecánico que podía sentarse, pararse y mover sus brazos independientemente, representando un trabajo pionero en robótica y automatización.",
+                hydraulic: "Sistemas Hidráulicos",
+                hydraulicDesc: "Diseñó sistemas complejos de gestión del agua incluyendo canales, esclusas y redes de irrigación que influyeron en la ingeniería civil durante generaciones.",
+                bridge: "Puente Multinivel",
+                bridgeDesc: "Propuso diseños innovadores de puentes con múltiples niveles para diferentes tipos de tráfico, anticipando conceptos modernos de planificación urbana.",
+                // Art section
+                artTitle: "Obras Maestras",
+                monaLisa: "La Mona Lisa",
+                monaArtDesc: "El retrato más famoso del mundo, mostrando la técnica del sfumato y una expresión enigmática. Alojada en el Louvre, representa la cúspide del retrato renacentista.",
+                lastSupper: "La Última Cena",
+                supperDesc: "Fresco revolucionario que representa la última comida de Cristo con precisión matemática en perspectiva y narrativa emocional profunda, a pesar de su condición deteriorada.",
+                vitruvian: "Hombre de Vitruvio",
+                vitruvianDesc: "Dibujo icónico que demuestra las proporciones humanas ideales, encarnando perfectamente la fusión renacentista del arte, las matemáticas y la observación científica.",
+                ladyErmine: "Dama con Armiño",
+                ermineDesc: "Retrato de Cecilia Gallerani mostrando una pose innovadora de tres cuartos y una representación magistral de la luz, textura y presencia psicológica.",
+                // Legacy section
+                legacyTitle: "Legado",
+                scientific: "Método Científico",
+                scientificDesc: "Su enfoque de observación, hipótesis y experimentación sentó las bases cruciales para la metodología científica moderna y las prácticas de investigación empírica.",
+                interdisciplinary: "Innovación Interdisciplinaria",
+                interDesc: "Demostró cómo el arte y la ciencia podrían complementarse mutuamente, inspirando el enfoque actual para la resolución creativa de problemas en múltiples campos.",
+                anatomical: "Revolución Anatómica",
+                anatomicalDesc: "Sus disecciones detalladas y dibujos avanzaron la comprensión médica, estableciendo la documentación artística como una herramienta para el descubrimiento científico.",
+                modern: "Inspiración Moderna",
+                modernDesc: "Continúa inspirando a artistas, ingenieros e inventores contemporáneos en todo el mundo, representando el ideal del aprendizaje permanente y la curiosidad ilimitada."
+            },
+            fr: {
+                // Settings
+                settings: "Paramètres",
+                theme: "Thème",
+                language: "Langue",
+                light: "Clair",
+                dark: "Sombre",
+                // Navigation
+                biography: "Biographie",
+                inventions: "Inventions",
+                art: "Art",
+                legacy: "Héritage",
+                // Hero section
+                heroTitle: "Léonard<br>de Vinci",
+                heroDates: "1452 — 1519",
+                heroDesc: "Polymathe de la Renaissance qui incarnait la fusion de l'art, de la science et de l'innovation. Un visionnaire dont les carnets contenaient des dessins de machines volantes, des études anatomiques et des chefs-d'œuvre qui continuent d'inspirer l'humanité cinq siècles plus tard.",
+                // Biography section
+                biographyTitle: "Biographie",
+                birth1452: "Naissance à Vinci",
+                birthDesc: "Né le 15 avril dans la ville perchée de Vinci, République de Florence. Fils illégitime d'un notaire prospère et d'une femme locale, marquant le début d'une vie extraordinaire.",
+                apprentice1466: "Début de l'Apprentissage",
+                apprenticeDesc: "À 14 ans, devient apprenti du célèbre artiste Andrea del Verrocchio à Florence, apprenant la peinture, la sculpture, la métallurgie et les arts mécaniques dans l'un des ateliers les plus prestigieux de la ville.",
+                milan1482: "Cour de Milan",
+                milanDesc: "S'installe à Milan sous le patronage de Ludovico Sforza, où il sert comme artiste de cour, ingénieur et inventeur, créant des dessins militaires, des plans architecturaux et des divertissements de cour.",
+                mona1503: "La Joconde",
+                monaDesc: "Commence le travail sur son portrait le plus célèbre, révolutionnant l'art de la peinture avec des techniques innovantes et une profondeur psychologique qui continue de captiver les spectateurs du monde entier.",
+                death1519: "Chapitre Final",
+                deathDesc: "Mort le 2 mai au Château du Clos Lucé à Amboise, France, sous le patronage du Roi François Ier, laissant derrière lui des milliers de pages de notes et de dessins qui ont révélé son génie au monde.",
+                // Inventions section
+                inventionsTitle: "Inventions",
+                aerialScrew: "Vis Aérienne",
+                aerialDesc: "A conçu une machine volante semblable à un hélicoptère avec un rotor hélicoïdal, démontrant sa compréhension de l'aérodynamique des siècles avant que le vol motorisé ne devienne réalité.",
+                armoredTank: "Char Blindé",
+                tankDesc: "A conceptualisé une forteresse mobile propulsée par des manivelles, avec un blindage et des ports de tir—essentiellement le premier design de char de l'histoire.",
+                parachute: "Design de Parachute",
+                parachuteDesc: "A créé un parachute en forme de pyramide en lin, que les tests modernes ont prouvé être remarquablement efficace et sûr pour la descente.",
+                robotKnight: "Chevalier Robotique",
+                robotDesc: "A construit un automate mécanique qui pouvait s'asseoir, se lever et bouger ses bras indépendamment, représentant un travail pionnier en robotique et automatisation.",
+                hydraulic: "Systèmes Hydrauliques",
+                hydraulicDesc: "A conçu des systèmes complexes de gestion de l'eau incluant canaux, écluses et réseaux d'irrigation qui ont influencé l'ingénierie civile pendant des générations.",
+                bridge: "Pont Multi-Niveaux",
+                bridgeDesc: "A proposé des conceptions innovantes de ponts avec plusieurs niveaux pour différents types de trafic, anticipant les concepts modernes d'urbanisme.",
+                // Art section
+                artTitle: "Chefs-d'œuvre",
+                monaLisa: "La Joconde",
+                monaArtDesc: "Le portrait le plus célèbre du monde, montrant la technique du sfumato et une expression énigmatique. Abritée au Louvre, elle représente l'apogée du portrait de la Renaissance.",
+                lastSupper: "La Cène",
+                supperDesc: "Fresque révolutionnaire dépeignant le dernier repas du Christ avec une précision mathématique en perspective et un récit émotionnel profond, malgré son état de détérioration.",
+                vitruvian: "Homme de Vitruve",
+                vitruvianDesc: "Dessin iconique démontrant les proportions humaines idéales, incarnant parfaitement la fusion Renaissance de l'art, des mathématiques et de l'observation scientifique.",
+                ladyErmine: "Dame à l'Hermine",
+                ermineDesc: "Portrait de Cecilia Gallerani montrant une pose innovante de trois quarts et un rendu magistral de la lumière, de la texture et de la présence psychologique.",
+                // Legacy section
+                legacyTitle: "Héritage",
+                scientific: "Méthode Scientifique",
+                scientificDesc: "Son approche d'observation, d'hypothèse et d'expérimentation a posé les bases cruciales de la méthodologie scientifique moderne et des pratiques de recherche empirique.",
+                interdisciplinary: "Innovation Interdisciplinaire",
+                interDesc: "A démontré comment l'art et la science pouvaient se compléter mutuellement, inspirant l'approche actuelle de résolution créative de problèmes dans plusieurs domaines.",
+                anatomical: "Révolution Anatomique",
+                anatomicalDesc: "Ses dissections détaillées et ses dessins ont fait progresser la compréhension médicale, établissant la documentation artistique comme un outil pour la découverte scientifique.",
+                modern: "Inspiration Moderne",
+                modernDesc: "Continue d'inspirer les artistes, ingénieurs et inventeurs contemporains du monde entier, représentant l'idéal d'apprentissage permanent et de curiosité sans limites."
+            },
+            de: {
+                // Settings
+                settings: "Einstellungen",
+                theme: "Design",
+                language: "Sprache",
+                light: "Hell",
+                dark: "Dunkel",
+                // Navigation
+                biography: "Biografie",
+                inventions: "Erfindungen",
+                art: "Kunst",
+                legacy: "Vermächtnis",
+                // Hero section
+                heroTitle: "Leonardo<br>da Vinci",
+                heroDates: "1452 — 1519",
+                heroDesc: "Renaissance-Universalgelehrter, der die Verschmelzung von Kunst, Wissenschaft und Innovation verkörperte. Ein Visionär, dessen Notizbücher Entwürfe für Flugmaschinen, anatomische Studien und Meisterwerke enthielten, die die Menschheit fünf Jahrhunderte später weiterhin inspirieren.",
+                // Biography section
+                biographyTitle: "Biografie",
+                birth1452: "Geburt in Vinci",
+                birthDesc: "Geboren am 15. April in der Bergstadt Vinci, Republik Florenz. Der uneheliche Sohn eines erfolgreichen Notars und einer einheimischen Frau, was den Beginn eines außergewöhnlichen Lebens markierte.",
+                apprentice1466: "Lehre Beginnt",
+                apprenticeDesc: "Mit 14 Jahren wurde er Lehrling des renommierten Künstlers Andrea del Verrocchio in Florenz und lernte Malerei, Bildhauerei, Metallbearbeitung und mechanische Künste in einer der prestigeträchtigsten Werkstätten der Stadt.",
+                milan1482: "Mailänder Hof",
+                milanDesc: "Zog nach Mailand unter der Schirmherrschaft von Ludovico Sforza, wo er als Hofkünstler, Ingenieur und Erfinder diente und militärische Entwürfe, architektonische Pläne und Hofunterhaltung schuf.",
+                mona1503: "Die Mona Lisa",
+                monaDesc: "Begann die Arbeit an seinem berühmtesten Porträt und revolutionierte die Malkunst mit innovativen Techniken und psychologischer Tiefe, die Betrachter weltweit weiterhin fesseln.",
+                death1519: "Letztes Kapitel",
+                deathDesc: "Starb am 2. Mai im Château du Clos Lucé in Amboise, Frankreich, unter der Schirmherrschaft von König Franz I. und hinterließ Tausende von Seiten mit Notizen und Zeichnungen, die sein Genie der Welt offenbarten.",
+                // Inventions section
+                inventionsTitle: "Erfindungen",
+                aerialScrew: "Luftschraube",
+                aerialDesc: "Entwarf eine hubschrauberartige Flugmaschine mit einem schraubenförmigen Rotor und demonstrierte sein Verständnis der Aerodynamik Jahrhunderte bevor der motorisierte Flug Realität wurde.",
+                armoredTank: "Gepanzerter Panzer",
+                tankDesc: "Konzipierte eine mobile Festung, die von Kurbeln angetrieben wurde, mit Panzerung und Schießscharten—im Wesentlichen das erste Panzerdesign der Geschichte.",
+                parachute: "Fallschirm-Design",
+                parachuteDesc: "Schuf einen pyramidenförmigen Fallschirm aus Leinen, der durch moderne Tests als bemerkenswert effektiv und sicher für den Abstieg erwiesen wurde.",
+                robotKnight: "Roboter-Ritter",
+                robotDesc: "Baute einen mechanischen Automaten, der sich setzen, stehen und seine Arme unabhängig bewegen konnte und damit Pionierarbeit in Robotik und Automatisierung leistete.",
+                hydraulic: "Hydraulische Systeme",
+                hydraulicDesc: "Entwarf komplexe Wassermanagementsysteme einschließlich Kanäle, Schleusen und Bewässerungsnetze, die den Tiefbau über Generationen beeinflussten.",
+                bridge: "Mehrstöckige Brücke",
+                bridgeDesc: "Schlug innovative Brückenentwürfe mit mehreren Ebenen für verschiedene Verkehrsarten vor und nahm moderne Stadtplanungskonzepte vorweg.",
+                // Art section
+                artTitle: "Meisterwerke",
+                monaLisa: "Mona Lisa",
+                monaArtDesc: "Das berühmteste Porträt der Welt, das die Sfumato-Technik und einen rätselhaften Ausdruck zeigt. Im Louvre untergebracht, repräsentiert es den Höhepunkt der Renaissance-Porträtmalerei.",
+                lastSupper: "Das Abendmahl",
+                supperDesc: "Revolutionäres Fresko, das Christi letzte Mahlzeit mit mathematischer Präzision in der Perspektive und tiefgreifender emotionaler Erzählung darstellt, trotz ihres verschlechterten Zustands.",
+                vitruvian: "Vitruvianischer Mensch",
+                vitruvianDesc: "Ikonische Zeichnung, die ideale menschliche Proportionen demonstriert und die Renaissance-Verschmelzung von Kunst, Mathematik und wissenschaftlicher Beobachtung perfekt verkörpert.",
+                ladyErmine: "Dame mit Hermelin",
+                ermineDesc: "Porträt von Cecilia Gallerani, das eine innovative Dreiviertel-Pose und meisterhafte Darstellung von Licht, Textur und psychologischer Präsenz zeigt.",
+                // Legacy section
+                legacyTitle: "Vermächtnis",
+                scientific: "Wissenschaftliche Methode",
+                scientificDesc: "Sein Ansatz von Beobachtung, Hypothese und Experimentation legte entscheidende Grundlagen für moderne wissenschaftliche Methodologie und empirische Forschungspraktiken.",
+                interdisciplinary: "Interdisziplinäre Innovation",
+                interDesc: "Demonstrierte, wie sich Kunst und Wissenschaft gegenseitig ergänzen können, und inspirierte den heutigen Ansatz zur kreativen Problemlösung in mehreren Bereichen.",
+                anatomical: "Anatomische Revolution",
+                anatomicalDesc: "Seine detaillierten Sektionen und Zeichnungen förderten das medizinische Verständnis und etablierten künstlerische Dokumentation als Werkzeug für wissenschaftliche Entdeckungen.",
+                modern: "Moderne Inspiration",
+                modernDesc: "Inspiriert weiterhin zeitgenössische Künstler, Ingenieure und Erfinder weltweit und repräsentiert das Ideal des lebenslangen Lernens und der grenzenlosen Neugier."
+            }
+        };
+
+        // Language management with auto-detection
+        function detectBrowserLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage;
+            const langCode = browserLang.split('-')[0].toLowerCase();
+            
+            // Return supported language or default to English
+            return translations[langCode] ? langCode : 'en';
+        }
+
+        let currentLang = detectBrowserLanguage();
+        
+        function updateContent(lang) {
+            const t = translations[lang];
+            if (!t) return;
+
+            // Update navigation
+            document.querySelector('a[href="#biography"]').textContent = t.biography;
+            document.querySelector('a[href="#inventions"]').textContent = t.inventions;
+            document.querySelector('a[href="#art"]').textContent = t.art;
+            document.querySelector('a[href="#legacy"]').textContent = t.legacy;
+
+            // Update hero section
+            document.querySelector('.hero-title').innerHTML = t.heroTitle;
+            document.querySelector('.hero-dates').textContent = t.heroDates;
+            document.querySelector('.hero-desc').textContent = t.heroDesc;
+
+            // Update biography section
+            document.querySelector('#biography .section-title').textContent = t.biographyTitle;
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            
+            timelineItems[0].querySelector('h3').textContent = t.birth1452;
+            timelineItems[0].querySelector('p').textContent = t.birthDesc;
+            timelineItems[1].querySelector('h3').textContent = t.apprentice1466;
+            timelineItems[1].querySelector('p').textContent = t.apprenticeDesc;
+            timelineItems[2].querySelector('h3').textContent = t.milan1482;
+            timelineItems[2].querySelector('p').textContent = t.milanDesc;
+            timelineItems[3].querySelector('h3').textContent = t.mona1503;
+            timelineItems[3].querySelector('p').textContent = t.monaDesc;
+            timelineItems[4].querySelector('h3').textContent = t.death1519;
+            timelineItems[4].querySelector('p').textContent = t.deathDesc;
+
+            // Update inventions section
+            document.querySelector('#inventions .section-title').textContent = t.inventionsTitle;
+            const inventionCards = document.querySelectorAll('#inventions .content-card');
+            
+            inventionCards[0].querySelector('.card-title').textContent = t.aerialScrew;
+            inventionCards[0].querySelector('.card-text').textContent = t.aerialDesc;
+            inventionCards[1].querySelector('.card-title').textContent = t.armoredTank;
+            inventionCards[1].querySelector('.card-text').textContent = t.tankDesc;
+            inventionCards[2].querySelector('.card-title').textContent = t.parachute;
+            inventionCards[2].querySelector('.card-text').textContent = t.parachuteDesc;
+            inventionCards[3].querySelector('.card-title').textContent = t.robotKnight;
+            inventionCards[3].querySelector('.card-text').textContent = t.robotDesc;
+            inventionCards[4].querySelector('.card-title').textContent = t.hydraulic;
+            inventionCards[4].querySelector('.card-text').textContent = t.hydraulicDesc;
+            inventionCards[5].querySelector('.card-title').textContent = t.bridge;
+            inventionCards[5].querySelector('.card-text').textContent = t.bridgeDesc;
+
+            // Update art section
+            document.querySelector('#art .section-title').textContent = t.artTitle;
+            const artCards = document.querySelectorAll('#art .content-card');
+            artCards[0].querySelector('.card-title').textContent = t.monaLisa;
+            artCards[0].querySelector('.card-text').textContent = t.monaArtDesc;
+            artCards[1].querySelector('.card-title').textContent = t.lastSupper;
+            artCards[1].querySelector('.card-text').textContent = t.supperDesc;
+            artCards[2].querySelector('.card-title').textContent = t.vitruvian;
+            artCards[2].querySelector('.card-text').textContent = t.vitruvianDesc;
+            artCards[3].querySelector('.card-title').textContent = t.ladyErmine;
+            artCards[3].querySelector('.card-text').textContent = t.ermineDesc;
+
+            // Update legacy section
+            document.querySelector('#legacy .section-title').textContent = t.legacyTitle;
+            const legacyCards = document.querySelectorAll('#legacy .content-card');
+            legacyCards[0].querySelector('.card-title').textContent = t.scientific;
+            legacyCards[0].querySelector('.card-text').textContent = t.scientificDesc;
+            legacyCards[1].querySelector('.card-title').textContent = t.interdisciplinary;
+            legacyCards[1].querySelector('.card-text').textContent = t.interDesc;
+            legacyCards[2].querySelector('.card-title').textContent = t.anatomical;
+            legacyCards[2].querySelector('.card-text').textContent = t.anatomicalDesc;
+            legacyCards[3].querySelector('.card-title').textContent = t.modern;
+            legacyCards[3].querySelector('.card-text').textContent = t.modernDesc;
+
+            // Update settings modal labels
+            document.querySelector('.settings-title').textContent = t.settings;
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.innerHTML = btn.dataset.theme === 'light'
+                    ? `<span>☀️</span><span>${t.light}</span>`
+                    : `<span>🌙</span><span>${t.dark}</span>`;
+            });
+            document.querySelector('.setting-label').textContent = t.theme;
+            document.querySelectorAll('.setting-label')[1].textContent = t.language;
+        }
+
+        // Theme + language persistence
+        const body = document.body;
+        const navbar = document.querySelector('#navbar');
+        const loader = document.querySelector('#loader');
+        const settingsBtn = document.querySelector('#settingsBtn');
+        const settingsModal = document.querySelector('#settingsModal');
+        const closeSettings = document.querySelector('#closeSettings');
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        const savedLang = localStorage.getItem('language') || currentLang;
+        currentLang = savedLang;
+
+        updateContent(currentLang);
+
+        // Navbar background on scroll
+        function updateNavbarBackground() {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        }
+        window.addEventListener('scroll', updateNavbarBackground);
+
+        // Loader
+        window.addEventListener('load', () => {
+            setTimeout(() => loader.classList.add('hidden'), 800);
+            updateNavbarBackground();
+        });
+
+        // Open/close settings modal
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        closeSettings.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        settingsModal.addEventListener('click', e => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Theme switcher
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                body.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                updateNavbarBackground();
+                updateContent(currentLang);
+            });
+        });
+
+        // Language switcher
+        document.querySelectorAll('.lang-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentLang = btn.dataset.lang;
+                localStorage.setItem('language', currentLang);
+                updateContent(currentLang);
+            });
+        });
+
+        // Animate sections on scroll
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.section-title, .content-card, .timeline-item')
+            .forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
