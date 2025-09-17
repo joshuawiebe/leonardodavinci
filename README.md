@@ -1,1 +1,1 @@
-# InfoPage about Leonardo da Vinci
+# Information Page about Leonardo da Vinci
