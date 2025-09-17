@@ -1,9 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Leonardo da Vinci</title>
+
+    <!-- APPLY THEME IMMEDIATELY (prevents flash) -->
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved ? saved : (prefersDark ? 'dark' : 'light');
+                // set on html so CSS [data-theme="dark"] rules apply immediately
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                // fail silently
+            }
+        })();
+    </script>
+
     <style>
         /* Future-forward design system with artistic elements */
         :root {
@@ -55,7 +71,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
+            background:
                 radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.03) 0%, transparent 50%),
                 radial-gradient(circle at 40% 80%, rgba(120, 219, 226, 0.03) 0%, transparent 50%);
@@ -434,7 +450,7 @@
             object-fit: cover;
             filter: grayscale(30%) contrast(1.1);
             transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-            box-shadow: 
+            box-shadow:
                 0 25px 50px -12px var(--shadow),
                 0 0 0 1px var(--border);
         }
@@ -713,7 +729,9 @@
         }
     </style>
 </head>
-<body data-theme="light">
+
+<!-- Note: do not set data-theme here (we set on <html> earlier to avoid flash) -->
+<body>
     <!-- Page loader -->
     <div class="loader" id="loader">
         <div class="loader-content">
@@ -730,10 +748,7 @@
                 <a href="#inventions" class="nav-link">Inventions</a>
                 <a href="#art" class="nav-link">Art</a>
                 <a href="#legacy" class="nav-link">Legacy</a>
-                <button class="settings-btn" id="settingsBtn">
-                    <span>⚙️</span>
-                    <span>Settings</span>
-                </button>
+                <button class="settings-btn" id="settingsBtn">Settings</button>
             </div>
         </div>
     </nav>
@@ -750,49 +765,43 @@
             </p>
         </div>
         <div class="hero-image-container">
-            <img src="https://quadro.burda-forward.de/ctf/ca3d91ba-ccd9-4802-9411-3f757f5ae585.92cf90ef-0400-4eda-a475-9afbf8d01f64.jpeg?im=RegionOfInterestCrop%3D%28992%2C558%29%2CregionOfInterest%3D%28750%2C500%29&hash=5c824d02ea70e8d06955d813d300e8abf96c09e24d9d2db8433c41e95bd4b5b7" 
+            <img src="https://quadro.burda-forward.de/ctf/ca3d91ba-ccd9-4802-9411-3f757f5ae585.92cf90ef-0400-4eda-a475-9afbf8d01f64.jpeg?im=RegionOfInterestCrop%3D%28992%2C558%29%2CregionOfInterest%3D%28750%2C500%29&hash=5c824d02ea70e8d06955d813d300e8abf96c09e24d9d2db8433c41e95bd4b5b7"
                  alt="Leonardo da Vinci" class="hero-image">
         </div>
     </section>
 
     <!-- Settings Modal -->
-    <div class="settings-modal" id="settingsModal">
-        <div class="settings-content">
+    <div class="settings-modal" id="settingsModal" aria-hidden="true">
+        <div class="settings-content" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
             <div class="settings-header">
-                <h3 class="settings-title">Settings</h3>
-                <button class="close-btn" id="closeSettings">×</button>
+                <h3 id="settingsTitle" class="settings-title">Settings</h3>
+                <button class="close-btn" id="closeSettings" aria-label="Close settings">×</button>
             </div>
-            
+
             <div class="setting-group">
                 <label class="setting-label">Theme</label>
-                <div class="theme-options">
-                    <button class="theme-option" data-theme="light">
-                        <span>☀️</span>
-                        <span>Light</span>
-                    </button>
-                    <button class="theme-option" data-theme="dark">
-                        <span>🌙</span>
-                        <span>Dark</span>
-                    </button>
+                <div class="theme-options" role="radiogroup" aria-label="Theme options">
+                    <button class="theme-option" data-theme="light" role="radio" aria-checked="false">Light</button>
+                    <button class="theme-option" data-theme="dark" role="radio" aria-checked="false">Dark</button>
                 </div>
             </div>
 
             <div class="setting-group">
                 <label class="setting-label">Language</label>
-                <div class="language-grid">
-                    <button class="lang-option" data-lang="en">
+                <div class="language-grid" role="list">
+                    <button class="lang-option" data-lang="en" role="listitem">
                         <span class="lang-name">English</span>
                         <span class="lang-code">EN</span>
                     </button>
-                    <button class="lang-option" data-lang="es">
+                    <button class="lang-option" data-lang="es" role="listitem">
                         <span class="lang-name">Español</span>
                         <span class="lang-code">ES</span>
                     </button>
-                    <button class="lang-option" data-lang="fr">
+                    <button class="lang-option" data-lang="fr" role="listitem">
                         <span class="lang-name">Français</span>
                         <span class="lang-code">FR</span>
                     </button>
-                    <button class="lang-option" data-lang="de">
+                    <button class="lang-option" data-lang="de" role="listitem">
                         <span class="lang-name">Deutsch</span>
                         <span class="lang-code">DE</span>
                     </button>
@@ -949,25 +958,23 @@
     </section>
 
     <script>
-        // Multi-language content system with settings labels
+        // -------------------------
+        // Translations (kept intact)
+        // -------------------------
         const translations = {
             en: {
-                // Settings
                 settings: "Settings",
                 theme: "Theme",
                 language: "Language",
                 light: "Light",
                 dark: "Dark",
-                // Navigation
                 biography: "Biography",
-                inventions: "Inventions", 
+                inventions: "Inventions",
                 art: "Art",
                 legacy: "Legacy",
-                // Hero section
                 heroTitle: "Leonardo<br>da Vinci",
                 heroDates: "1452 — 1519",
                 heroDesc: "Renaissance polymath who embodied the fusion of art, science, and innovation. A visionary whose notebooks contained designs for flying machines, anatomical studies, and masterpieces that continue to inspire humanity five centuries later.",
-                // Biography section
                 biographyTitle: "Biography",
                 birth1452: "Birth in Vinci",
                 birthDesc: "Born on April 15 in the hilltop town of Vinci, Republic of Florence. The illegitimate son of a successful notary and a local woman, marking the beginning of an extraordinary life.",
@@ -979,11 +986,10 @@
                 monaDesc: "Began work on his most famous portrait, revolutionizing the art of painting with innovative techniques and psychological depth that continue to captivate viewers worldwide.",
                 death1519: "Final Chapter",
                 deathDesc: "Died on May 2 at Château du Clos Lucé in Amboise, France, under the patronage of King Francis I, leaving behind thousands of pages of notes and drawings that revealed his genius to the world.",
-                // Inventions section
                 inventionsTitle: "Inventions",
                 aerialScrew: "Aerial Screw",
                 aerialDesc: "Designed a helicopter-like flying machine with a helical rotor, demonstrating his understanding of aerodynamics centuries before powered flight became reality.",
-                armoredTank: "Armored Tank", 
+                armoredTank: "Armored Tank",
                 tankDesc: "Conceptualized a mobile fortress powered by cranks, featuring armor plating and gun ports—essentially the first tank design in history.",
                 parachute: "Parachute Design",
                 parachuteDesc: "Created a pyramid-shaped parachute made of linen, which modern testing has proven to be remarkably effective and safe for descent.",
@@ -993,7 +999,6 @@
                 hydraulicDesc: "Designed complex water management systems including canals, locks, and irrigation networks that influenced civil engineering for generations.",
                 bridge: "Multi-Level Bridge",
                 bridgeDesc: "Proposed innovative bridge designs with multiple levels for different types of traffic, anticipating modern urban planning concepts.",
-                // Art section
                 artTitle: "Masterworks",
                 monaLisa: "Mona Lisa",
                 monaArtDesc: "The world's most famous portrait, showcasing sfumato technique and enigmatic expression. Housed in the Louvre, it represents the pinnacle of Renaissance portraiture.",
@@ -1003,7 +1008,6 @@
                 vitruvianDesc: "Iconic drawing demonstrating ideal human proportions, perfectly embodying Renaissance fusion of art, mathematics, and scientific observation.",
                 ladyErmine: "Lady with an Ermine",
                 ermineDesc: "Portrait of Cecilia Gallerani showcasing innovative three-quarter pose and masterful rendering of light, texture, and psychological presence.",
-                // Legacy section
                 legacyTitle: "Legacy",
                 scientific: "Scientific Method",
                 scientificDesc: "His approach of observation, hypothesis, and experimentation laid crucial groundwork for modern scientific methodology and empirical research practices.",
@@ -1015,22 +1019,18 @@
                 modernDesc: "Continues to inspire contemporary artists, engineers, and inventors worldwide, representing the ideal of lifelong learning and boundless curiosity."
             },
             es: {
-                // Settings
                 settings: "Configuración",
                 theme: "Tema",
                 language: "Idioma",
                 light: "Claro",
                 dark: "Oscuro",
-                // Navigation
                 biography: "Biografía",
                 inventions: "Inventos",
-                art: "Arte", 
+                art: "Arte",
                 legacy: "Legado",
-                // Hero section
                 heroTitle: "Leonardo<br>da Vinci",
                 heroDates: "1452 — 1519",
                 heroDesc: "Polímata renacentista que encarnó la fusión del arte, la ciencia y la innovación. Un visionario cuyos cuadernos contenían diseños de máquinas voladoras, estudios anatómicos y obras maestras que continúan inspirando a la humanidad cinco siglos después.",
-                // Biography section
                 biographyTitle: "Biografía",
                 birth1452: "Nacimiento en Vinci",
                 birthDesc: "Nació el 15 de abril en la ciudad montañosa de Vinci, República de Florencia. Hijo ilegítimo de un notario exitoso y una mujer local, marcando el comienzo de una vida extraordinaria.",
@@ -1042,7 +1042,6 @@
                 monaDesc: "Comenzó a trabajar en su retrato más famoso, revolucionando el arte de la pintura con técnicas innovadoras y profundidad psicológica que continúan cautivando a espectadores de todo el mundo.",
                 death1519: "Capítulo Final",
                 deathDesc: "Murió el 2 de mayo en el Château du Clos Lucé en Amboise, Francia, bajo el patrocinio del Rey Francisco I, dejando atrás miles de páginas de notas y dibujos que revelaron su genio al mundo.",
-                // Inventions section
                 inventionsTitle: "Inventos",
                 aerialScrew: "Tornillo Aéreo",
                 aerialDesc: "Diseñó una máquina voladora similar a un helicóptero con un rotor helicoidal, demostrando su comprensión de la aerodinámica siglos antes de que el vuelo motorizado se hiciera realidad.",
@@ -1056,7 +1055,6 @@
                 hydraulicDesc: "Diseñó sistemas complejos de gestión del agua incluyendo canales, esclusas y redes de irrigación que influyeron en la ingeniería civil durante generaciones.",
                 bridge: "Puente Multinivel",
                 bridgeDesc: "Propuso diseños innovadores de puentes con múltiples niveles para diferentes tipos de tráfico, anticipando conceptos modernos de planificación urbana.",
-                // Art section
                 artTitle: "Obras Maestras",
                 monaLisa: "La Mona Lisa",
                 monaArtDesc: "El retrato más famoso del mundo, mostrando la técnica del sfumato y una expresión enigmática. Alojada en el Louvre, representa la cúspide del retrato renacentista.",
@@ -1066,34 +1064,28 @@
                 vitruvianDesc: "Dibujo icónico que demuestra las proporciones humanas ideales, encarnando perfectamente la fusión renacentista del arte, las matemáticas y la observación científica.",
                 ladyErmine: "Dama con Armiño",
                 ermineDesc: "Retrato de Cecilia Gallerani mostrando una pose innovadora de tres cuartos y una representación magistral de la luz, textura y presencia psicológica.",
-                // Legacy section
                 legacyTitle: "Legado",
                 scientific: "Método Científico",
                 scientificDesc: "Su enfoque de observación, hipótesis y experimentación sentó las bases cruciales para la metodología científica moderna y las prácticas de investigación empírica.",
                 interdisciplinary: "Innovación Interdisciplinaria",
                 interDesc: "Demostró cómo el arte y la ciencia podrían complementarse mutuamente, inspirando el enfoque actual para la resolución creativa de problemas en múltiples campos.",
-                anatomical: "Revolución Anatómica",
-                anatomicalDesc: "Sus disecciones detalladas y dibujos avanzaron la comprensión médica, estableciendo la documentación artística como una herramienta para el descubrimiento científico.",
+                anatomical: "Revolución Anatómica", anatomicalDesc: "Sus disecciones detalladas y dibujos avanzaron la comprensión médica, estableciendo la documentación artística como una herramienta para el descubrimiento científico.",
                 modern: "Inspiración Moderna",
                 modernDesc: "Continúa inspirando a artistas, ingenieros e inventores contemporáneos en todo el mundo, representando el ideal del aprendizaje permanente y la curiosidad ilimitada."
             },
             fr: {
-                // Settings
                 settings: "Paramètres",
                 theme: "Thème",
                 language: "Langue",
                 light: "Clair",
                 dark: "Sombre",
-                // Navigation
                 biography: "Biographie",
                 inventions: "Inventions",
                 art: "Art",
                 legacy: "Héritage",
-                // Hero section
                 heroTitle: "Léonard<br>de Vinci",
                 heroDates: "1452 — 1519",
                 heroDesc: "Polymathe de la Renaissance qui incarnait la fusion de l'art, de la science et de l'innovation. Un visionnaire dont les carnets contenaient des dessins de machines volantes, des études anatomiques et des chefs-d'œuvre qui continuent d'inspirer l'humanité cinq siècles plus tard.",
-                // Biography section
                 biographyTitle: "Biographie",
                 birth1452: "Naissance à Vinci",
                 birthDesc: "Né le 15 avril dans la ville perchée de Vinci, République de Florence. Fils illégitime d'un notaire prospère et d'une femme locale, marquant le début d'une vie extraordinaire.",
@@ -1105,7 +1097,6 @@
                 monaDesc: "Commence le travail sur son portrait le plus célèbre, révolutionnant l'art de la peinture avec des techniques innovantes et une profondeur psychologique qui continue de captiver les spectateurs du monde entier.",
                 death1519: "Chapitre Final",
                 deathDesc: "Mort le 2 mai au Château du Clos Lucé à Amboise, France, sous le patronage du Roi François Ier, laissant derrière lui des milliers de pages de notes et de dessins qui ont révélé son génie au monde.",
-                // Inventions section
                 inventionsTitle: "Inventions",
                 aerialScrew: "Vis Aérienne",
                 aerialDesc: "A conçu une machine volante semblable à un hélicoptère avec un rotor hélicoïdal, démontrant sa compréhension de l'aérodynamique des siècles avant que le vol motorisé ne devienne réalité.",
@@ -1119,17 +1110,15 @@
                 hydraulicDesc: "A conçu des systèmes complexes de gestion de l'eau incluant canaux, écluses et réseaux d'irrigation qui ont influencé l'ingénierie civile pendant des générations.",
                 bridge: "Pont Multi-Niveaux",
                 bridgeDesc: "A proposé des conceptions innovantes de ponts avec plusieurs niveaux pour différents types de trafic, anticipant les concepts modernes d'urbanisme.",
-                // Art section
                 artTitle: "Chefs-d'œuvre",
                 monaLisa: "La Joconde",
                 monaArtDesc: "Le portrait le plus célèbre du monde, montrant la technique du sfumato et une expression énigmatique. Abritée au Louvre, elle représente l'apogée du portrait de la Renaissance.",
                 lastSupper: "La Cène",
                 supperDesc: "Fresque révolutionnaire dépeignant le dernier repas du Christ avec une précision mathématique en perspective et un récit émotionnel profond, malgré son état de détérioration.",
                 vitruvian: "Homme de Vitruve",
-                vitruvianDesc: "Dessin iconique démontrant les proportions humaines idéales, incarnant parfaitement la fusion Renaissance de l'art, des mathématiques et de l'observation scientifique.",
+                vitruvianDesc: "Dessin iconique démontrant les proportions humaines idéales, incarnant parfaitement la fusion Renaissance de l'art, les mathématiques et l'observation scientifique.",
                 ladyErmine: "Dame à l'Hermine",
                 ermineDesc: "Portrait de Cecilia Gallerani montrant une pose innovante de trois quarts et un rendu magistral de la lumière, de la texture et de la présence psychologique.",
-                // Legacy section
                 legacyTitle: "Héritage",
                 scientific: "Méthode Scientifique",
                 scientificDesc: "Son approche d'observation, d'hypothèse et d'expérimentation a posé les bases cruciales de la méthodologie scientifique moderne et des pratiques de recherche empirique.",
@@ -1141,22 +1130,18 @@
                 modernDesc: "Continue d'inspirer les artistes, ingénieurs et inventeurs contemporains du monde entier, représentant l'idéal d'apprentissage permanent et de curiosité sans limites."
             },
             de: {
-                // Settings
                 settings: "Einstellungen",
                 theme: "Design",
                 language: "Sprache",
                 light: "Hell",
                 dark: "Dunkel",
-                // Navigation
                 biography: "Biografie",
                 inventions: "Erfindungen",
                 art: "Kunst",
                 legacy: "Vermächtnis",
-                // Hero section
                 heroTitle: "Leonardo<br>da Vinci",
                 heroDates: "1452 — 1519",
                 heroDesc: "Renaissance-Universalgelehrter, der die Verschmelzung von Kunst, Wissenschaft und Innovation verkörperte. Ein Visionär, dessen Notizbücher Entwürfe für Flugmaschinen, anatomische Studien und Meisterwerke enthielten, die die Menschheit fünf Jahrhunderte später weiterhin inspirieren.",
-                // Biography section
                 biographyTitle: "Biografie",
                 birth1452: "Geburt in Vinci",
                 birthDesc: "Geboren am 15. April in der Bergstadt Vinci, Republik Florenz. Der uneheliche Sohn eines erfolgreichen Notars und einer einheimischen Frau, was den Beginn eines außergewöhnlichen Lebens markierte.",
@@ -1168,7 +1153,6 @@
                 monaDesc: "Begann die Arbeit an seinem berühmtesten Porträt und revolutionierte die Malkunst mit innovativen Techniken und psychologischer Tiefe, die Betrachter weltweit weiterhin fesseln.",
                 death1519: "Letztes Kapitel",
                 deathDesc: "Starb am 2. Mai im Château du Clos Lucé in Amboise, Frankreich, unter der Schirmherrschaft von König Franz I. und hinterließ Tausende von Seiten mit Notizen und Zeichnungen, die sein Genie der Welt offenbarten.",
-                // Inventions section
                 inventionsTitle: "Erfindungen",
                 aerialScrew: "Luftschraube",
                 aerialDesc: "Entwarf eine hubschrauberartige Flugmaschine mit einem schraubenförmigen Rotor und demonstrierte sein Verständnis der Aerodynamik Jahrhunderte bevor der motorisierte Flug Realität wurde.",
@@ -1182,7 +1166,6 @@
                 hydraulicDesc: "Entwarf komplexe Wassermanagementsysteme einschließlich Kanäle, Schleusen und Bewässerungsnetze, die den Tiefbau über Generationen beeinflussten.",
                 bridge: "Mehrstöckige Brücke",
                 bridgeDesc: "Schlug innovative Brückenentwürfe mit mehreren Ebenen für verschiedene Verkehrsarten vor und nahm moderne Stadtplanungskonzepte vorweg.",
-                // Art section
                 artTitle: "Meisterwerke",
                 monaLisa: "Mona Lisa",
                 monaArtDesc: "Das berühmteste Porträt der Welt, das die Sfumato-Technik und einen rätselhaften Ausdruck zeigt. Im Louvre untergebracht, repräsentiert es den Höhepunkt der Renaissance-Porträtmalerei.",
@@ -1192,7 +1175,6 @@
                 vitruvianDesc: "Ikonische Zeichnung, die ideale menschliche Proportionen demonstriert und die Renaissance-Verschmelzung von Kunst, Mathematik und wissenschaftlicher Beobachtung perfekt verkörpert.",
                 ladyErmine: "Dame mit Hermelin",
                 ermineDesc: "Porträt von Cecilia Gallerani, das eine innovative Dreiviertel-Pose und meisterhafte Darstellung von Licht, Textur und psychologischer Präsenz zeigt.",
-                // Legacy section
                 legacyTitle: "Vermächtnis",
                 scientific: "Wissenschaftliche Methode",
                 scientificDesc: "Sein Ansatz von Beobachtung, Hypothese und Experimentation legte entscheidende Grundlagen für moderne wissenschaftliche Methodologie und empirische Forschungspraktiken.",
@@ -1205,149 +1187,234 @@
             }
         };
 
-        // Language management with auto-detection
+        // -------------------------
+        // Language management
+        // -------------------------
         function detectBrowserLanguage() {
-            const browserLang = navigator.language || navigator.userLanguage;
+            const browserLang = navigator.language || navigator.userLanguage || 'en';
             const langCode = browserLang.split('-')[0].toLowerCase();
-            
-            // Return supported language or default to English
             return translations[langCode] ? langCode : 'en';
         }
 
+        // initial detect
         let currentLang = detectBrowserLanguage();
-        
+
+        // -------------------------
+        // Utility: set theme UI state (active buttons + attribute)
+        // -------------------------
+        function applyThemeUI(theme) {
+            try {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+            } catch (e) {}
+            // update theme-option active classes and aria
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-checked', 'true');
+                } else {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-checked', 'false');
+                }
+            });
+        }
+
+        // -------------------------
+        // Update content from translations
+        // -------------------------
         function updateContent(lang) {
             const t = translations[lang];
             if (!t) return;
 
-            // Update navigation
+            // Navigation
             document.querySelector('a[href="#biography"]').textContent = t.biography;
             document.querySelector('a[href="#inventions"]').textContent = t.inventions;
             document.querySelector('a[href="#art"]').textContent = t.art;
             document.querySelector('a[href="#legacy"]').textContent = t.legacy;
 
-            // Update hero section
-            document.querySelector('.hero-title').innerHTML = t.heroTitle;
-            document.querySelector('.hero-dates').textContent = t.heroDates;
-            document.querySelector('.hero-desc').textContent = t.heroDesc;
+            // Settings button label
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) settingsBtn.textContent = t.settings;
 
-            // Update biography section
-            document.querySelector('#biography .section-title').textContent = t.biographyTitle;
+            // Hero
+            const heroTitle = document.querySelector('.hero-title');
+            if (heroTitle) heroTitle.innerHTML = t.heroTitle;
+            const heroDates = document.querySelector('.hero-dates');
+            if (heroDates) heroDates.textContent = t.heroDates;
+            const heroDesc = document.querySelector('.hero-desc');
+            if (heroDesc) heroDesc.textContent = t.heroDesc;
+
+            // Biography
+            const bioTitle = document.querySelector('#biography .section-title');
+            if (bioTitle) bioTitle.textContent = t.biographyTitle;
             const timelineItems = document.querySelectorAll('.timeline-item');
-            
-            timelineItems[0].querySelector('h3').textContent = t.birth1452;
-            timelineItems[0].querySelector('p').textContent = t.birthDesc;
-            timelineItems[1].querySelector('h3').textContent = t.apprentice1466;
-            timelineItems[1].querySelector('p').textContent = t.apprenticeDesc;
-            timelineItems[2].querySelector('h3').textContent = t.milan1482;
-            timelineItems[2].querySelector('p').textContent = t.milanDesc;
-            timelineItems[3].querySelector('h3').textContent = t.mona1503;
-            timelineItems[3].querySelector('p').textContent = t.monaDesc;
-            timelineItems[4].querySelector('h3').textContent = t.death1519;
-            timelineItems[4].querySelector('p').textContent = t.deathDesc;
+            if (timelineItems.length >= 5) {
+                timelineItems[0].querySelector('h3').textContent = t.birth1452;
+                timelineItems[0].querySelector('p').textContent = t.birthDesc;
+                timelineItems[1].querySelector('h3').textContent = t.apprentice1466;
+                timelineItems[1].querySelector('p').textContent = t.apprenticeDesc;
+                timelineItems[2].querySelector('h3').textContent = t.milan1482;
+                timelineItems[2].querySelector('p').textContent = t.milanDesc;
+                timelineItems[3].querySelector('h3').textContent = t.mona1503;
+                timelineItems[3].querySelector('p').textContent = t.monaDesc;
+                timelineItems[4].querySelector('h3').textContent = t.death1519;
+                timelineItems[4].querySelector('p').textContent = t.deathDesc;
+            }
 
-            // Update inventions section
-            document.querySelector('#inventions .section-title').textContent = t.inventionsTitle;
+            // Inventions
+            const invTitle = document.querySelector('#inventions .section-title');
+            if (invTitle) invTitle.textContent = t.inventionsTitle;
             const inventionCards = document.querySelectorAll('#inventions .content-card');
-            
-            inventionCards[0].querySelector('.card-title').textContent = t.aerialScrew;
-            inventionCards[0].querySelector('.card-text').textContent = t.aerialDesc;
-            inventionCards[1].querySelector('.card-title').textContent = t.armoredTank;
-            inventionCards[1].querySelector('.card-text').textContent = t.tankDesc;
-            inventionCards[2].querySelector('.card-title').textContent = t.parachute;
-            inventionCards[2].querySelector('.card-text').textContent = t.parachuteDesc;
-            inventionCards[3].querySelector('.card-title').textContent = t.robotKnight;
-            inventionCards[3].querySelector('.card-text').textContent = t.robotDesc;
-            inventionCards[4].querySelector('.card-title').textContent = t.hydraulic;
-            inventionCards[4].querySelector('.card-text').textContent = t.hydraulicDesc;
-            inventionCards[5].querySelector('.card-title').textContent = t.bridge;
-            inventionCards[5].querySelector('.card-text').textContent = t.bridgeDesc;
+            if (inventionCards.length >= 6) {
+                inventionCards[0].querySelector('.card-title').textContent = t.aerialScrew;
+                inventionCards[0].querySelector('.card-text').textContent = t.aerialDesc;
+                inventionCards[1].querySelector('.card-title').textContent = t.armoredTank;
+                inventionCards[1].querySelector('.card-text').textContent = t.tankDesc;
+                inventionCards[2].querySelector('.card-title').textContent = t.parachute;
+                inventionCards[2].querySelector('.card-text').textContent = t.parachuteDesc;
+                inventionCards[3].querySelector('.card-title').textContent = t.robotKnight;
+                inventionCards[3].querySelector('.card-text').textContent = t.robotDesc;
+                inventionCards[4].querySelector('.card-title').textContent = t.hydraulic;
+                inventionCards[4].querySelector('.card-text').textContent = t.hydraulicDesc;
+                inventionCards[5].querySelector('.card-title').textContent = t.bridge;
+                inventionCards[5].querySelector('.card-text').textContent = t.bridgeDesc;
+            }
 
-            // Update art section
-            document.querySelector('#art .section-title').textContent = t.artTitle;
+            // Art
+            const artTitle = document.querySelector('#art .section-title');
+            if (artTitle) artTitle.textContent = t.artTitle;
             const artCards = document.querySelectorAll('#art .content-card');
-            artCards[0].querySelector('.card-title').textContent = t.monaLisa;
-            artCards[0].querySelector('.card-text').textContent = t.monaArtDesc;
-            artCards[1].querySelector('.card-title').textContent = t.lastSupper;
-            artCards[1].querySelector('.card-text').textContent = t.supperDesc;
-            artCards[2].querySelector('.card-title').textContent = t.vitruvian;
-            artCards[2].querySelector('.card-text').textContent = t.vitruvianDesc;
-            artCards[3].querySelector('.card-title').textContent = t.ladyErmine;
-            artCards[3].querySelector('.card-text').textContent = t.ermineDesc;
+            if (artCards.length >= 4) {
+                artCards[0].querySelector('.card-title').textContent = t.monaLisa;
+                artCards[0].querySelector('.card-text').textContent = t.monaArtDesc;
+                artCards[1].querySelector('.card-title').textContent = t.lastSupper;
+                artCards[1].querySelector('.card-text').textContent = t.supperDesc;
+                artCards[2].querySelector('.card-title').textContent = t.vitruvian;
+                artCards[2].querySelector('.card-text').textContent = t.vitruvianDesc;
+                artCards[3].querySelector('.card-title').textContent = t.ladyErmine;
+                artCards[3].querySelector('.card-text').textContent = t.ermineDesc;
+            }
 
-            // Update legacy section
-            document.querySelector('#legacy .section-title').textContent = t.legacyTitle;
+            // Legacy
+            const legacyTitle = document.querySelector('#legacy .section-title');
+            if (legacyTitle) legacyTitle.textContent = t.legacyTitle;
             const legacyCards = document.querySelectorAll('#legacy .content-card');
-            legacyCards[0].querySelector('.card-title').textContent = t.scientific;
-            legacyCards[0].querySelector('.card-text').textContent = t.scientificDesc;
-            legacyCards[1].querySelector('.card-title').textContent = t.interdisciplinary;
-            legacyCards[1].querySelector('.card-text').textContent = t.interDesc;
-            legacyCards[2].querySelector('.card-title').textContent = t.anatomical;
-            legacyCards[2].querySelector('.card-text').textContent = t.anatomicalDesc;
-            legacyCards[3].querySelector('.card-title').textContent = t.modern;
-            legacyCards[3].querySelector('.card-text').textContent = t.modernDesc;
+            if (legacyCards.length >= 4) {
+                legacyCards[0].querySelector('.card-title').textContent = t.scientific;
+                legacyCards[0].querySelector('.card-text').textContent = t.scientificDesc;
+                legacyCards[1].querySelector('.card-title').textContent = t.interdisciplinary;
+                legacyCards[1].querySelector('.card-text').textContent = t.interDesc;
+                legacyCards[2].querySelector('.card-title').textContent = t.anatomical;
+                legacyCards[2].querySelector('.card-text').textContent = t.anatomicalDesc;
+                legacyCards[3].querySelector('.card-title').textContent = t.modern;
+                legacyCards[3].querySelector('.card-text').textContent = t.modernDesc;
+            }
 
-            // Update settings modal labels
-            document.querySelector('.settings-title').textContent = t.settings;
+            // Settings modal labels and theme buttons (now plain text)
+            const settingsTitle = document.querySelector('.settings-title');
+            if (settingsTitle) settingsTitle.textContent = t.settings;
+
+            // theme-option plain text (no emojis)
             document.querySelectorAll('.theme-option').forEach(btn => {
-                btn.innerHTML = btn.dataset.theme === 'light'
-                    ? `<span>☀️</span><span>${t.light}</span>`
-                    : `<span>🌙</span><span>${t.dark}</span>`;
+                btn.textContent = (btn.dataset.theme === 'light') ? t.light : t.dark;
+                // update aria label
+                btn.setAttribute('aria-label', (btn.dataset.theme === 'light') ? t.light : t.dark);
             });
-            document.querySelector('.setting-label').textContent = t.theme;
-            document.querySelectorAll('.setting-label')[1].textContent = t.language;
+
+            // setting labels (first = theme, second = language)
+            const settingLabels = document.querySelectorAll('.setting-label');
+            if (settingLabels.length > 0) settingLabels[0].textContent = t.theme;
+            if (settingLabels.length > 1) settingLabels[1].textContent = t.language;
+
+            // Mark active language
+            document.querySelectorAll('.lang-option').forEach(btn => {
+                if (btn.dataset.lang === lang) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
         }
 
-        // Theme + language persistence
+        // -------------------------
+        // Initialization: theme & language from localStorage or system/browser
+        // -------------------------
         const body = document.body;
         const navbar = document.querySelector('#navbar');
-        const loader = document.querySelector('#loader');
-        const settingsBtn = document.querySelector('#settingsBtn');
-        const settingsModal = document.querySelector('#settingsModal');
-        const closeSettings = document.querySelector('#closeSettings');
+        const loader = document.getElementById('loader');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettings = document.getElementById('closeSettings');
 
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', savedTheme);
-        const savedLang = localStorage.getItem('language') || currentLang;
+        // determine theme (saved or system preference)
+        const savedTheme = (function() {
+            try { return localStorage.getItem('theme'); } catch (e) { return null; }
+        })();
+        const initialTheme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        // ensure UI reflects theme
+        applyThemeUI(initialTheme);
+
+        // language saved or detected
+        const savedLang = (function() {
+            try { return localStorage.getItem('language'); } catch (e) { return null; }
+        })() || currentLang;
         currentLang = savedLang;
 
+        // apply translations
         updateContent(currentLang);
 
-        // Navbar background on scroll
+        // set active theme (UI)
+        applyThemeUI(initialTheme);
+
+        // update navbar look on scroll
         function updateNavbarBackground() {
             navbar.classList.toggle('scrolled', window.scrollY > 50);
         }
         window.addEventListener('scroll', updateNavbarBackground);
 
-        // Loader
+        // Loader + scroll memory restore after load (hide loader then restore)
         window.addEventListener('load', () => {
-            setTimeout(() => loader.classList.add('hidden'), 800);
-            updateNavbarBackground();
+            setTimeout(() => {
+                if (loader) loader.classList.add('hidden');
+                updateNavbarBackground();
+
+                // restore last section if present
+                try {
+                    const last = localStorage.getItem('lastSection');
+                    if (last) {
+                        // small delay so layout stabilizes (images, fonts)
+                        const el = document.getElementById(last);
+                        if (el) {
+                            // Use instant scroll to avoid double animation
+                            el.scrollIntoView({ behavior: 'auto', block: 'start' });
+                        }
+                    }
+                } catch (e) {}
+            }, 800);
         });
 
         // Open/close settings modal
         settingsBtn.addEventListener('click', () => {
             settingsModal.classList.add('active');
+            settingsModal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
         });
         closeSettings.addEventListener('click', () => {
             settingsModal.classList.remove('active');
+            settingsModal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
         });
         settingsModal.addEventListener('click', e => {
             if (e.target === settingsModal) {
                 settingsModal.classList.remove('active');
+                settingsModal.setAttribute('aria-hidden', 'true');
                 document.body.style.overflow = '';
             }
         });
 
-        // Theme switcher
+        // Theme switcher buttons
         document.querySelectorAll('.theme-option').forEach(btn => {
             btn.addEventListener('click', () => {
                 const theme = btn.dataset.theme;
-                body.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-                updateNavbarBackground();
+                applyThemeUI(theme);
+                // update translations in case settings labels change with theme (not necessary but harmless)
                 updateContent(currentLang);
             });
         });
@@ -1355,23 +1422,71 @@
         // Language switcher
         document.querySelectorAll('.lang-option').forEach(btn => {
             btn.addEventListener('click', () => {
-                currentLang = btn.dataset.lang;
-                localStorage.setItem('language', currentLang);
+                const newLang = btn.dataset.lang;
+                currentLang = newLang;
+                try { localStorage.setItem('language', currentLang); } catch (e) {}
                 updateContent(currentLang);
+                // reflect active language button
+                document.querySelectorAll('.lang-option').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
             });
         });
 
-        // Animate sections on scroll
-        const observer = new IntersectionObserver(entries => {
+        // Mark active theme button initially (in case of saved theme)
+        (function markInitialThemeButton() {
+            const theme = document.documentElement.getAttribute('data-theme') || initialTheme;
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+                btn.setAttribute('aria-checked', btn.dataset.theme === theme ? 'true' : 'false');
+            });
+        })();
+
+        // NAV link clicks update scroll memory (also update active state)
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const id = href.slice(1);
+                    try { localStorage.setItem('lastSection', id); } catch (e) {}
+                }
+            });
+        });
+
+        // IntersectionObserver records last viewed section (scroll memory)
+        const sectionObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                // if the section is more than 50% visible, record it
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                    const id = entry.target.id;
+                    if (id) {
+                        try { localStorage.setItem('lastSection', id); } catch (e) {}
+                    }
+                }
+                // add fade-in animation when any section content becomes visible
                 if (entry.isIntersecting) {
                     entry.target.classList.add('fade-in-up');
                 }
             });
+        }, { threshold: [0.5] });
+
+        // Observe main sections
+        document.querySelectorAll('#hero, #biography, #inventions, #art, #legacy').forEach(sec => sectionObserver.observe(sec));
+
+        // Also observe content cards, timeline items, and titles for animation (existing behavior)
+        const animObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('fade-in-up');
+            });
         }, { threshold: 0.2 });
 
-        document.querySelectorAll('.section-title, .content-card, .timeline-item')
-            .forEach(el => observer.observe(el));
+        document.querySelectorAll('.section-title, .content-card, .timeline-item').forEach(el => animObserver.observe(el));
+
+        // ensure the settings modal shows the currently selected language and theme
+        (function setInitialActiveLanguage() {
+            document.querySelectorAll('.lang-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === currentLang);
+            });
+        })();
+
     </script>
 </body>
 </html>
