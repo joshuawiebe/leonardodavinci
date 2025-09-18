@@ -413,73 +413,100 @@
         }
 
         .theme-options {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .theme-option {
-            flex: 1;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: none;
-            color: var(--text);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .theme-option:hover {
-            background: var(--hover);
-            transform: translateY(-1px);
-        }
-
-        .theme-option.active {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
-        }
-
-        /* Fix for dark theme button text color in light mode */
-        [data-theme="light"] .theme-option[data-theme="dark"]:not(.active) {
-            color: var(--text);
-        }
-
-        [data-theme="dark"] .theme-option[data-theme="light"]:not(.active) {
-            color: var(--text);
-        }
-
-        .language-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
         }
 
+        /* Base styles for option buttons */
+        .theme-option,
         .lang-option {
             padding: 1rem;
             border: 1px solid var(--border);
             border-radius: 12px;
             background: none;
-            color: var(--text);
+            color: #0d0d0d;
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 0.9rem;
             text-align: center;
         }
 
-        .lang-option:hover {
-            background: var(--hover);
+        /* Dark mode text colors */
+        [data-theme="dark"] .theme-option,
+        [data-theme="dark"] .lang-option {
+            color: #f5f5f5;
+        }
+
+        /* Light mode hover states */
+        html:not([data-theme="dark"]) .theme-option:hover,
+        html:not([data-theme="dark"]) .lang-option:hover {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border-color: #000000;
             transform: translateY(-1px);
         }
 
-        .lang-option.active {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
+        /* Dark mode hover states */
+        [data-theme="dark"] .theme-option:hover,
+        [data-theme="dark"] .lang-option:hover {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border-color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* Active states for light mode */
+        html:not([data-theme="dark"]) .theme-option.active,
+        html:not([data-theme="dark"]) .lang-option.active {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        /* Active + hover states for light mode */
+        html:not([data-theme="dark"]) .theme-option.active:hover,
+        html:not([data-theme="dark"]) .lang-option.active:hover {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border-color: #000000;
+        }
+
+        /* Active states for dark mode */
+        [data-theme="dark"] .theme-option.active,
+        [data-theme="dark"] .lang-option.active {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
+        /* Active + hover states for dark mode */
+        [data-theme="dark"] .theme-option.active:hover,
+        [data-theme="dark"] .lang-option.active:hover {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border-color: #ffffff;
+        }
+
+        /* Theme name and code display */
+        .theme-name {
+            display: block;
+            font-weight: 500;
+        }
+
+        .theme-code {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 0.2rem;
+        }
+
+        /* Grid layouts */
+        .theme-options,
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
         }
 
         .lang-name {
