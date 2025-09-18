@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -232,6 +232,8 @@
                 opacity: 0;
                 transform: translateY(-20px);
                 animation: slideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) 2.5s forwards;
+                position: relative;
+                z-index: 101;
             }
 
             .hamburger span {
@@ -532,6 +534,7 @@
                 max-width: 1400px;
                 margin: 0 auto;
                 position: relative;
+                overflow: hidden;
             }
 
             .hero-content {
@@ -579,6 +582,7 @@
                 opacity: 0;
                 transform: translateX(50px) scale(0.9);
                 animation: slideInRight 1.4s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards;
+                overflow: hidden;
             }
 
             .hero-image {
@@ -591,11 +595,20 @@
                 box-shadow:
                     0 25px 50px -12px var(--shadow),
                     0 0 0 1px var(--border);
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                opacity: 0;
+            }
+
+            .hero-image.active {
+                opacity: 1;
             }
 
             .hero-image:hover {
                 filter: grayscale(0%) contrast(1.2);
-                transform: scale(1.02) rotate(-0.5deg);
+                transform: translate(-50%, -50%) scale(1.02) rotate(-0.5deg);
             }
 
             /* Artistic decorative elements */
@@ -827,13 +840,42 @@
 
             /* Responsive design */
             @media (max-width: 968px) {
-                /* Navigation */
+                /* Prevent horizontal scrolling */
+                body {
+                    overflow-x: hidden;
+                }
+
+                /* Navigation - make it stick properly */
+                .nav {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    z-index: 100;
+                    padding: 1rem 1.5rem;
+                    backdrop-filter: blur(20px);
+                    border-bottom: 1px solid transparent;
+                    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+                    background: var(--glass);
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .nav-container {
+                    max-width: 100%;
+                    width: 100%;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
                 .nav-links {
                     display: none;
                 }
 
                 .hamburger {
                     display: flex;
+                    position: relative;
+                    z-index: 101;
                 }
 
                 /* Hero section */
@@ -841,32 +883,62 @@
                     grid-template-columns: 1fr;
                     gap: 2rem;
                     text-align: center;
-                    padding: 6rem 1rem 2rem;
+                    padding: 7rem 1.5rem 2rem;
                     min-height: auto;
+                    max-width: 100%;
+                    overflow: hidden;
                 }
 
                 .hero-content {
                     padding: 1rem 0;
+                    text-align: center;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .hero-title {
+                    text-align: center;
+                    width: 100%;
+                }
+
+                .hero-dates {
+                    text-align: center;
+                    width: 100%;
+                }
+
+                .hero-desc {
+                    text-align: center;
+                    width: 100%;
+                    max-width: 100%;
                 }
 
                 .hero-image-container {
                     order: -1;
                     height: 50vh;
+                    width: 100%;
+                    max-width: 100%;
+                    margin: 0 auto;
                 }
 
                 .hero-image {
                     height: 100%;
                     object-position: center;
+                    width: 100%;
+                    max-width: 100%;
                 }
 
                 /* Content sections */
                 .section {
-                    padding: 6rem 1rem;
+                    padding: 6rem 1.5rem;
+                    max-width: 100%;
+                    overflow: hidden;
                 }
 
                 .section-title {
                     font-size: clamp(2rem, 5vw, 3rem);
                     margin-bottom: 3rem;
+                    text-align: center;
+                    width: 100%;
                 }
 
                 /* Timeline */
@@ -889,6 +961,8 @@
                     margin: 1rem;
                     padding: 1.5rem;
                     max-width: calc(100% - 2rem);
+                    width: calc(100% - 2rem);
+                    box-sizing: border-box;
                 }
 
                 .settings-header {
@@ -913,12 +987,26 @@
                     gap: 1.5rem;
                     margin-top: 2rem;
                 }
+
+                /* Ensure all content stays within bounds */
+                * {
+                    max-width: 100%;
+                    box-sizing: border-box;
+                }
             }
 
             @media (max-width: 480px) {
                 /* Navigation */
                 .nav {
                     padding: 1rem;
+                    position: fixed;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                .nav-container {
+                    width: 100%;
+                    max-width: 100%;
                 }
 
                 .logo {
@@ -932,31 +1020,50 @@
 
                 /* Hero section */
                 .hero {
-                    padding: 5rem 1rem 1rem;
+                    padding: 6rem 1rem 1rem;
+                    text-align: center;
+                    width: 100%;
+                    max-width: 100%;
+                    overflow: hidden;
+                }
+
+                .hero-content {
+                    width: 100%;
+                    text-align: center;
                 }
 
                 .hero-title {
                     font-size: clamp(2.5rem, 6vw, 4rem);
+                    text-align: center;
                 }
 
                 .hero-desc {
                     font-size: 1rem;
                     line-height: 1.6;
+                    text-align: center;
+                    max-width: 100%;
                 }
 
                 /* Sections */
                 .section {
                     padding: 4rem 1rem;
+                    width: 100%;
+                    max-width: 100%;
+                    overflow: hidden;
                 }
 
                 .section-title {
                     font-size: clamp(1.75rem, 4vw, 2.5rem);
                     margin-bottom: 2.5rem;
+                    text-align: center;
                 }
 
                 /* Content cards */
                 .content-card {
                     padding: 1.5rem;
+                    width: 100%;
+                    max-width: 100%;
+                    box-sizing: border-box;
                 }
 
                 .card-title {
@@ -970,6 +1077,10 @@
                 /* Settings modal */
                 .settings-content {
                     padding: 1.25rem;
+                    width: calc(100% - 2rem);
+                    max-width: calc(100% - 2rem);
+                    margin: 1rem;
+                    box-sizing: border-box;
                 }
 
                 .setting-label {
@@ -981,8 +1092,15 @@
                     font-size: 1.25rem;
                 }
 
-                .content-card {
-                    padding: 2rem;
+                /* Ensure no horizontal overflow */
+                html, body {
+                    overflow-x: hidden;
+                    max-width: 100%;
+                }
+
+                * {
+                    max-width: 100%;
+                    box-sizing: border-box;
                 }
             }
 
@@ -1052,8 +1170,14 @@
                 </p>
             </div>
             <div class="hero-image-container">
-                <img src="https://quadro.burda-forward.de/ctf/ca3d91ba-ccd9-4802-9411-3f757f5ae585.92cf90ef-0400-4eda-a475-9afbf8d01f64.jpeg?im=RegionOfInterestCrop%3D%28992%2C558%29%2CregionOfInterest%3D%28750%2C500%29&hash=5c824d02ea70e8d06955d813d300e8abf96c09e24d9d2db8433c41e95bd4b5b7"
-                    alt="Leonardo da Vinci" class="hero-image">
+                <img src="./images/leonardo_da_vinci.jpg"
+                    alt="Leonardo da Vinci" class="hero-image active">
+                <img src="./images/vitruvian_man.jpg"
+                    alt="Vitruvian Man by Leonardo da Vinci" class="hero-image">
+                <img src="./images/mona_lisa.jpg"
+                    alt="Mona Lisa by Leonardo da Vinci" class="hero-image">
+                <img src="./images/last_supper.jpg"
+                    alt="The Last Supper by Leonardo da Vinci" class="hero-image">
             </div>
         </section>
 
@@ -1488,6 +1612,37 @@
             let currentLang = detectBrowserLanguage();
 
             // -------------------------
+            // Image Carousel System
+            // -------------------------
+            function initImageCarousel() {
+                const images = document.querySelectorAll('.hero-image');
+                if (images.length <= 1) return; // No carousel needed for single image
+                
+                let currentIndex = 0;
+                
+                // Ensure first image is active initially
+                images.forEach((img, index) => {
+                    img.classList.toggle('active', index === 0);
+                });
+                
+                function nextImage() {
+                    // Fade out current image
+                    images[currentIndex].classList.remove('active');
+                    
+                    // Move to next image (loop back to 0 if at end)
+                    currentIndex = (currentIndex + 1) % images.length;
+                    
+                    // Fade in new image
+                    setTimeout(() => {
+                        images[currentIndex].classList.add('active');
+                    }, 400); // Half of the CSS transition time for smooth crossfade
+                }
+                
+                // Start the carousel
+                setInterval(nextImage, 10000); // Change image every 10 seconds
+            }
+
+            // -------------------------
             // Utility: set theme UI state (active buttons + attribute)
             // -------------------------
             function applyThemeUI(theme) {
@@ -1696,6 +1851,9 @@
 
             // Loader + scroll memory restore after load (hide loader then restore)
             window.addEventListener('load', () => {
+                // Initialize image carousel
+                initImageCarousel();
+                
                 setTimeout(() => {
                     if (loader) loader.classList.add('hidden');
                     updateNavbarBackground();
