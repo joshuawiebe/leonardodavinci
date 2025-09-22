@@ -1,5 +1,423 @@
 // -------------------------
-// Translations (kept intact)
+// Page Loader and Animations
+// -------------------------
+function startPageAnimations() {
+    // Navbar animations
+    document.querySelector('.logo').classList.add('animate');
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.add('animate'));
+    document.querySelector('.settings-btn')?.classList.add('animate');
+    document.querySelector('.hamburger')?.classList.add('animate');
+    
+    // Hero content animations with improved timing and easing
+    const heroTitle = document.querySelector('.hero-title');
+    const heroDates = document.querySelector('.hero-dates');
+    const heroDesc = document.querySelector('.hero-desc');
+    const heroImage = document.querySelector('.hero-image-container');
+
+    // Sophisticated easing curve for smooth, natural movement
+    const easeOutBack = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+    const easeOutCustom = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+    heroTitle.style.opacity = '0';
+    heroDates.style.opacity = '0';
+    heroDesc.style.opacity = '0';
+    heroImage.style.opacity = '0';
+
+    // Staggered, flowing animations
+    heroTitle.style.animation = `slideInLeft 1.2s ${easeOutBack} 0.3s forwards`;
+    heroDates.style.animation = `slideInLeft 1s ${easeOutCustom} 0.5s forwards`;
+    heroDesc.style.animation = `slideInLeft 1s ${easeOutCustom} 0.7s forwards`;
+    heroImage.style.animation = `slideInRight 1.4s ${easeOutCustom} 0.4s forwards`;
+}
+
+// Handle loader timing
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.querySelector('.loader');
+    if (loader) {
+        // Shorter, more dynamic loading experience
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            
+            // Sequential navbar animations
+            const elements = [
+                document.querySelector('.logo'),
+                ...document.querySelectorAll('.nav-link'),
+                document.querySelector('.settings-btn'),
+                document.querySelector('.hamburger')
+            ];
+            
+            // Add animate class to each element
+            elements.forEach(element => {
+                if (element) element.classList.add('animate');
+            });
+            
+            // Slightly reduced wait time for smoother transition
+            setTimeout(startPageAnimations, 600); // Reduced wait time for loader fade out
+        }, 1200); // Reduced initial wait time for a snappier feel
+    }
+});
+
+// -------------------------
+// Image Gallery Viewer
+// -------------------------
+class ImageGalleryViewer {
+    constructor() {
+        this.createGalleryDOM();
+        this.currentIndex = 0;
+        this.images = [];
+        this.isOpen = false;
+        this.setupEventListeners();
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+    }
+
+    createGalleryDOM() {
+        const gallery = document.createElement('div');
+        gallery.className = 'gallery-viewer';
+        gallery.innerHTML = `
+            <div class="gallery-content">
+                <button class="gallery-close" aria-label="Close gallery">×</button>
+                <button class="gallery-nav prev" aria-label="Previous image">‹</button>
+                <button class="gallery-nav next" aria-label="Next image">›</button>
+                <div class="gallery-title"></div>
+                <div class="gallery-image-container">
+                    <img class="gallery-image" alt="" />
+                </div>
+            </div>
+        `;
+        document.body.appendChild(gallery);
+
+        this.element = gallery;
+        this.imageElement = gallery.querySelector('.gallery-image');
+        this.titleElement = gallery.querySelector('.gallery-title');
+    }
+
+    setupEventListeners() {
+        // Close button
+        this.element.querySelector('.gallery-close').addEventListener('click', () => this.close());
+
+        // Navigation buttons
+        this.element.querySelector('.gallery-nav.prev').addEventListener('click', () => this.prev());
+        this.element.querySelector('.gallery-nav.next').addEventListener('click', () => this.next());
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!this.isOpen) return;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    this.prev();
+                    break;
+                case 'ArrowRight':
+                    this.next();
+                    break;
+                case 'Escape':
+                    this.close();
+                    break;
+            }
+        });
+
+        // Touch events for swipe
+        this.element.addEventListener('touchstart', (e) => {
+            this.touchStartX = e.touches[0].clientX;
+        });
+
+        this.element.addEventListener('touchmove', (e) => {
+            if (!this.isOpen) return;
+            
+            e.preventDefault();
+            const touchX = e.touches[0].clientX;
+            const diff = this.touchStartX - touchX;
+            
+            // Add visual feedback of swipe
+            this.imageElement.style.transform = `translateX(${-diff}px)`;
+        });
+
+        this.element.addEventListener('touchend', (e) => {
+            if (!this.isOpen) return;
+            
+            const diff = this.touchStartX - this.touchEndX;
+            const threshold = window.innerWidth * 0.2; // 20% of screen width
+            
+            // Reset transform
+            this.imageElement.style.transform = '';
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
+            }
+        });
+
+        // Close on background click
+        this.element.addEventListener('click', (e) => {
+            if (e.target === this.element) this.close();
+        });
+    }
+
+    loadImage(src, title) {
+        return new Promise((resolve, reject) => {
+            this.imageElement.src = src;
+            this.imageElement.onload = () => {
+                this.imageElement.style.opacity = '1';
+                resolve();
+            };
+            this.imageElement.onerror = reject;
+        });
+    }
+
+    async show(images, startIndex = 0, section = null) {
+        if (section) {
+            // Get all images from the section
+            const cards = Array.from(document.querySelectorAll(`#${section} .content-card`));
+            this.images = cards.flatMap(card => {
+                const title = card.querySelector('.card-title')?.textContent.trim() || '';
+                const desc = card.querySelector('.card-text')?.textContent.trim() || '';
+
+                if (section === 'inventions' && multiImageMap[title]) {
+                    // Map the descriptive names to the actual file names
+                    const fileMap = {
+                        'air_screw_prototype.jpg': 'air_screw_1.jpg',
+                        'air_screw_sketch.jpg': 'air_screw_2.jpg',
+                        'amored_tank_design.JPG': 'amored_tank_1.JPG',
+                        'amored_tank_blueprint.jpg': 'amored_tank_2.jpg',
+                        'hydraulic_systems_diagram.jpg': 'hydraulic_systems_1.jpg',
+                        'hydraulic_systems_schematic.png': 'hydraulic_systems_2.png',
+                        'multi-level_bridge_design.jpg': 'multi-level_bridge_1.jpg',
+                        'multi-level_bridge_concept.jpg': 'multi-level_bridge_2.jpg'
+                    };
+                    
+                    // For cards with multiple images
+                    return multiImageMap[title].map(displayName => ({
+                        src: `./images/cards/inventions/${fileMap[displayName]}`,
+                        title: `${title} - ${displayName.split('.')[0].split('_').pop().replace(/^\w/, c => c.toUpperCase())}`,
+                        desc: desc
+                    }));
+                } else {
+                    // Single image (art or inventions)
+                    const imageName = card.getAttribute('data-image');
+                    return [{
+                        src: `./images/cards/${section}/${imageName}.jpg`,
+                        title: title,
+                        desc: desc
+                    }];
+                }
+            });
+        } else {
+            this.images = images;
+        }
+        
+        this.currentIndex = startIndex;
+        this.isOpen = true;
+        // Save current scroll position
+        this.scrollY = window.scrollY;
+        // Prevent scrolling
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = `-${this.scrollY}px`;
+        
+        this.element.classList.add('active');
+        await this.updateImage();
+    }
+
+    async updateImage() {
+        const current = this.images[this.currentIndex];
+        this.titleElement.textContent = current.title;
+        
+        // Start loading animation
+        this.imageElement.style.opacity = '0';
+        
+        try {
+            await this.loadImage(current.src, current.title);
+        } catch (error) {
+            console.error('Failed to load image:', error);
+        }
+    }
+
+    async next() {
+        if (!this.isOpen) return;
+        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+        await this.updateImage();
+    }
+
+    async prev() {
+        if (!this.isOpen) return;
+        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+        await this.updateImage();
+    }
+
+    close() {
+        if (!this.isOpen) return;
+        this.isOpen = false;
+        this.element.classList.remove('active');
+        
+        // Restore scrolling and position
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        window.scrollTo(0, this.scrollY);
+    }
+}
+
+// Helper function to gather image data from a container
+function getImagesFromContainer(container) {
+    const images = [];
+    container.querySelectorAll('img').forEach(img => {
+        images.push({
+            src: img.src,
+            title: img.alt || img.getAttribute('data-title') || ''
+        });
+    });
+    return images;
+}
+
+// Create and initialize gallery viewer
+const galleryViewer = new ImageGalleryViewer();
+
+// Initialize click handlers for gallery
+document.addEventListener('DOMContentLoaded', () => {
+    // Hero section images
+    const heroContainer = document.querySelector('.hero-image-container');
+    if (heroContainer) {
+        heroContainer.style.cursor = 'pointer';
+        const heroImages = getImagesFromContainer(heroContainer);
+        
+        heroContainer.addEventListener('click', () => {
+            // Find the current active image index
+            const activeImg = heroContainer.querySelector('.hero-image.active');
+            const currentIndex = Array.from(heroContainer.children).indexOf(activeImg);
+            
+            // Show gallery with current image
+            galleryViewer.show(heroImages, currentIndex);
+        });
+    }
+
+    // Initialize card previews and click handlers
+    const contentCards = document.querySelectorAll('#art .content-card, #inventions .content-card');
+    
+    contentCards.forEach(card => {
+        const section = card.closest('section').id;
+        const preview = card.querySelector('.card-preview');
+        const title = card.querySelector('.card-title')?.textContent || '';
+        const desc = card.querySelector('.card-text')?.textContent || '';
+        const cardTitle = title.trim();
+        
+        // Set up preview background
+        if (preview) {
+            if (section === 'art') {
+                const imageName = card.getAttribute('data-image');
+                preview.style.backgroundImage = `url('./images/cards/art/${imageName}.jpg')`;
+            } else {
+                const images = JSON.parse(card.getAttribute('data-images') || `["${card.getAttribute('data-image')}.jpg"]`);
+                preview.style.backgroundImage = `url('./images/cards/inventions/${images[0]}')`;
+            }
+        }
+        
+        // Add click handler to the card
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (e) => {
+            // Don't trigger if clicking on reference icons
+            if (e.target.closest('.ref-icon-container')) return;
+            
+            // Calculate start index based on cards before this one
+            const startIndex = Array.from(document.querySelectorAll(`#${section} .content-card`))
+                .slice(0, Array.from(card.parentNode.children).indexOf(card))
+                .reduce((count, prevCard) => {
+                    const title = prevCard.querySelector('.card-title')?.textContent.trim() || '';
+                    return count + (section === 'inventions' && multiImageMap[title] ? multiImageMap[title].length : 1);
+                }, 0);
+            
+            // Show gallery for the entire section, starting from this card's position
+            galleryViewer.show(null, startIndex, section);
+        });
+    });
+});
+
+// -------------------------
+// Reference Links
+// -------------------------
+const artWikiLinks = {
+    'Mona Lisa': 'https://en.wikipedia.org/wiki/Mona_Lisa',
+    'The Last Supper': 'https://en.wikipedia.org/wiki/The_Last_Supper_(Leonardo)',
+    'Vitruvian Man': 'https://en.wikipedia.org/wiki/Vitruvian_Man',
+    'Lady with an Ermine': 'https://en.wikipedia.org/wiki/Lady_with_an_Ermine'
+};
+
+    const inventionWikiLinks = {
+        'Aerial Screw': 'https://en.wikipedia.org/wiki/Leonardo%27s_aerial_screw',
+        'Armored Tank': 'https://en.wikipedia.org/wiki/Leonardo%27s_tank',
+        'Parachute Design': 'https://en.wikipedia.org/wiki/Leonardo%27s_parachute',
+        'Robotic Knight': 'https://en.wikipedia.org/wiki/Leonardo%27s_robot',
+        'Hydraulic Systems': 'https://en.wikipedia.org/wiki/Science_and_inventions_of_Leonardo_da_Vinci#Engineering_and_hydraulics',
+        'Multi-Level Bridge': 'https://en.wikipedia.org/wiki/Science_and_inventions_of_Leonardo_da_Vinci#Civil_engineering'
+    };
+
+    const multiImageMap = {
+        'Aerial Screw': ['air_screw_prototype.jpg', 'air_screw_sketch.jpg'],
+        'Armored Tank': ['amored_tank_design.JPG', 'amored_tank_blueprint.jpg'],
+        'Hydraulic Systems': ['hydraulic_systems_diagram.jpg', 'hydraulic_systems_schematic.png'],
+        'Multi-Level Bridge': ['multi-level_bridge_design.jpg', 'multi-level_bridge_concept.jpg']
+    };function addReferenceIcon(card, link) {
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'ref-icon-container';
+    
+    // Arrow SVG
+    const arrowSvg = `
+        <svg class="ref-icon arrow" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M7 7h8.586L5.293 17.293l1.414 1.414L17 8.414V17h2V5H7v2z" fill="currentColor"/>
+        </svg>
+    `;
+    
+    // World SVG
+    const worldSvg = `
+        <svg class="ref-icon world" viewBox="0 0 24 24" width="24" height="24">
+            <g fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 3a9 9 0 0 1 9 9M3 12a9 9 0 0 1 9-9" />
+                <path d="M12 21a9 9 0 0 1-9-9M21 12a9 9 0 0 1-9 9" />
+                <path d="M3.5 9h17M3.5 15h17" />
+                <path d="M12 3v18" stroke-opacity="0.5" />
+                <path d="M7 4.5C7 8.5 12 12 12 12s5-3.5 5-7.5" />
+                <path d="M7 19.5c0-4 5-7.5 5-7.5s5 3.5 5 7.5" />
+            </g>
+        </svg>
+    `;
+    
+    iconContainer.innerHTML = arrowSvg + worldSvg;
+    card.appendChild(iconContainer);
+    
+    // Make the container clickable
+    iconContainer.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering the card's click event
+        window.open(link, '_blank', 'noopener');
+    });
+}
+
+// Add reference links to art and inventions cards
+document.addEventListener('DOMContentLoaded', () => {
+    // Add reference links to art cards
+    document.querySelectorAll('#art .content-card').forEach(card => {
+        const title = card.querySelector('.card-title').textContent.trim();
+        if (artWikiLinks[title]) {
+            addReferenceIcon(card, artWikiLinks[title]);
+        }
+    });
+
+    // Add reference links to invention cards
+    document.querySelectorAll('#inventions .content-card').forEach(card => {
+        const title = card.querySelector('.card-title').textContent.trim();
+        if (inventionWikiLinks[title]) {
+            addReferenceIcon(card, inventionWikiLinks[title]);
+        }
+    });
+});
+
+// -------------------------
+// Translations
 // -------------------------
 const translations = {
     en: {
@@ -248,27 +666,76 @@ function initImageCarousel() {
     if (images.length <= 1) return; // No carousel needed for single image
     
     let currentIndex = 0;
+    let isTransitioning = false;
     
-    // Ensure first image is active initially
-    images.forEach((img, index) => {
-        img.classList.toggle('active', index === 0);
-    });
-    
-    function nextImage() {
-        // Fade out current image
-        images[currentIndex].classList.remove('active');
-        
-        // Move to next image (loop back to 0 if at end)
-        currentIndex = (currentIndex + 1) % images.length;
-        
-        // Fade in new image
-        setTimeout(() => {
-            images[currentIndex].classList.add('active');
-        }, 400); // Half of the CSS transition time for smooth crossfade
+    // Preload all images
+    function preloadImages() {
+        images.forEach(img => {
+            if (img.src) {
+                const preloadImg = new Image();
+                preloadImg.src = img.src;
+            }
+        });
     }
     
-    // Start the carousel
-    setInterval(nextImage, 10000); // Change image every 10 seconds
+    // Initialize the carousel state
+    function initCarousel() {
+        images.forEach((img, index) => {
+            img.style.zIndex = images.length - index; // Stack images properly
+            img.classList.toggle('active', index === 0);
+        });
+    }
+    
+    function nextImage() {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        // Current image
+        const currentImg = images[currentIndex];
+        currentImg.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        currentImg.classList.remove('active');
+        
+        // Next image
+        currentIndex = (currentIndex + 1) % images.length;
+        const nextImg = images[currentIndex];
+        
+        // Update z-index for proper stacking
+        currentImg.style.zIndex = 1;
+        nextImg.style.zIndex = 2;
+        
+        // Trigger transition with proper timing
+        requestAnimationFrame(() => {
+            nextImg.classList.add('active');
+            
+            // Reset after transition
+            setTimeout(() => {
+                isTransitioning = false;
+                images.forEach((img, idx) => {
+                    img.style.zIndex = images.length - ((idx - currentIndex + images.length) % images.length);
+                });
+            }, 1000); // Increased transition time for smoothness
+        });
+    }
+    
+    // Initialize
+    preloadImages();
+    initCarousel();
+    
+    // Start the carousel with a consistent interval
+    let intervalId = setInterval(nextImage, 7000); // Change image every 7 seconds
+    
+    // Add hover pause functionality
+    const container = document.querySelector('.hero-image-container');
+    
+    container.addEventListener('mouseenter', () => {
+        clearInterval(intervalId);
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        // Clear any existing interval first to prevent multiple intervals
+        clearInterval(intervalId);
+        intervalId = setInterval(nextImage, 7000);
+    });
 }
 
 // -------------------------
@@ -453,28 +920,44 @@ function updateNavbarBackground() {
 }
 window.addEventListener('scroll', updateNavbarBackground);
 
-// Mobile hamburger menu toggle
+// Mobile hamburger menu toggle with improved state management
 function toggleMobileMenu() {
     const isActive = hamburger.classList.contains('active');
+    
+    // Toggle classes with proper state management
     hamburger.classList.toggle('active');
     mobileMenu.classList.toggle('active');
     
+    // Update ARIA attributes for accessibility
+    hamburger.setAttribute('aria-expanded', !isActive);
+    mobileMenu.setAttribute('aria-hidden', isActive);
+    
     // Prevent body scroll when mobile menu is open
-    if (!isActive) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
+    document.body.style.overflow = !isActive ? 'hidden' : '';
+    
+    // If closing the menu, ensure mobile menu items reset their animation state
+    if (isActive) {
+        const menuItems = mobileMenu.querySelectorAll('.nav-link');
+        menuItems.forEach(item => {
+            item.style.animation = 'none';
+            item.offsetHeight; // Force reflow
+            item.style.animation = '';
+        });
     }
 }
 
 hamburger.addEventListener('click', toggleMobileMenu);
 
-// Close mobile menu when clicking on a link
+// Close mobile menu when clicking on a link with proper animation reset
 document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
     link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        mobileMenu.classList.remove('active');
-        document.body.style.overflow = '';
+        // Call the toggle function to ensure proper state management
+        toggleMobileMenu();
+        
+        // Ensure smooth transition when navigating
+        setTimeout(() => {
+            document.body.style.overflow = '';
+        }, 300); // Match transition duration
     });
 });
 
@@ -483,23 +966,33 @@ window.addEventListener('load', () => {
     // Initialize image carousel
     initImageCarousel();
     
+    // Set minimum display time for loader (2.5 seconds)
+    const loadStartTime = Date.now();
+    const minimumLoadTime = 2500;
+    const animationDuration = 800;
+    
     setTimeout(() => {
-        if (loader) loader.classList.add('hidden');
-        updateNavbarBackground();
+        const elapsedTime = Date.now() - loadStartTime;
+        const remainingTime = Math.max(0, minimumLoadTime - elapsedTime);
+        
+        setTimeout(() => {
+            if (loader) loader.classList.add('hidden');
+            updateNavbarBackground();
 
-        // restore last section if present
-        try {
-            const last = localStorage.getItem('lastSection');
-            if (last) {
-                // small delay so layout stabilizes (images, fonts)
-                const el = document.getElementById(last);
-                if (el) {
-                    // Use instant scroll to avoid double animation
-                    el.scrollIntoView({ behavior: 'auto', block: 'start' });
+            // restore last section if present
+            try {
+                const last = localStorage.getItem('lastSection');
+                if (last) {
+                    // small delay so layout stabilizes (images, fonts)
+                    const el = document.getElementById(last);
+                    if (el) {
+                        // Use instant scroll to avoid double animation
+                        el.scrollIntoView({ behavior: 'auto', block: 'start' });
+                    }
                 }
-            }
-        } catch (e) {}
-    }, 800);
+            } catch (e) {}
+        }, remainingTime);
+    }, animationDuration);
 });
 
 // Open/close settings modal
@@ -609,11 +1102,14 @@ document.querySelectorAll('.section-title, .content-card, .timeline-item').forEa
     });
 })();
 
-// Close mobile menu when window is resized to desktop size
+// Close mobile menu when window is resized to desktop size with debouncing
+let resizeTimer;
 window.addEventListener('resize', () => {
-    if (window.innerWidth > 968) {
-        hamburger.classList.remove('active');
-        mobileMenu.classList.remove('active');
-        document.body.style.overflow = '';
-    }
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        if (window.innerWidth > 968 && mobileMenu.classList.contains('active')) {
+            // Properly close the menu using the toggle function
+            toggleMobileMenu();
+        }
+    }, 250); // Debounce resize events
 });
