@@ -823,38 +823,33 @@ html:not([data-theme="dark"]) .lang-option.active:hover {
 }
 
 .section-title {
-    font-size: 2.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 3rem;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 200;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 5rem;
+    opacity: 0;
+    transform: translateY(40px);
     position: relative;
-    text-align: center;
-}
-
-@media (max-width: 968px) {
-    .section-title {
-        text-align: left;
-        margin-left: 1.5rem;
-    }
-    
-    .section-title::after {
-        left: 0;
-        transform: none;
-    }
 }
 
 .section-title::after {
     content: '';
     position: absolute;
-    bottom: -0.5rem;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: -20px;
+    left: 0;
     width: 60px;
-    height: 3px;
-    background: var(--accent-color);
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.6;
 }
 
 .content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 3rem;
+    margin-top: 4rem;
+}
 
 .content-card {
     background: var(--bg);
