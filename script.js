@@ -1,60 +1,216 @@
 // -------------------------
+// Performance Optimizations and Utilities
+// -------------------------
+// Debounce utility for performance optimization
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Throttle utility for performance optimization
+function throttle(func, limit) {
+    let inThrottle;
+    return function executedFunction(...args) {
+        if (!inThrottle) {
+            func(...args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// RAF helper for smooth animations
+function rafPromise() {
+    return new Promise(requestAnimationFrame);
+}
+
+// Intersection Observer for optimizing off-screen animations
+const createIntersectionObserver = (callback, options = {}) => {
+    const defaultOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1,
+        ...options
+    };
+    
+    return new IntersectionObserver((entries) => {
+        entries.forEach(callback);
+    }, defaultOptions);
+};
+
+// Memory leak prevention - store cleanup functions
+const cleanupFunctions = new Set();
+
+// Register cleanup function
+function registerCleanup(fn) {
+    cleanupFunctions.add(fn);
+}
+
+// Cleanup on page hide/unload
+window.addEventListener('pagehide', () => {
+    cleanupFunctions.forEach(fn => fn());
+    cleanupFunctions.clear();
+}, { once: true });
+
+// -------------------------
+// Animation Constants and Utilities
+// -------------------------
+const ANIMATION_TIMING = {
+    loaderMinDisplay: 1200,    // Minimum time to show loader
+    loaderFadeOut: 600,       // How long the loader takes to fade out
+    navStagger: 80,           // Delay between nav items
+    heroDelay: 200,          // Delay before hero animations start
+    heroStagger: 150,        // Delay between hero elements
+};
+
+const EASINGS = {
+    outBack: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    outCustom: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    outSmooth: 'cubic-bezier(0.4, 0, 0.2, 1)'
+};
+
+// Helper to stagger animations
+function staggerAnimate(elements, className, delayStart = 0, staggerDelay = 100) {
+    elements.forEach((el, i) => {
+        setTimeout(() => el.classList.add(className), delayStart + (i * staggerDelay));
+    });
+}
+
+// -------------------------
 // Page Loader and Animations
 // -------------------------
 function startPageAnimations() {
-    // Navbar animations
-    document.querySelector('.logo').classList.add('animate');
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.add('animate'));
-    document.querySelector('.settings-btn')?.classList.add('animate');
-    document.querySelector('.hamburger')?.classList.add('animate');
-    
-    // Hero content animations with improved timing and easing
-    const heroTitle = document.querySelector('.hero-title');
-    const heroDates = document.querySelector('.hero-dates');
-    const heroDesc = document.querySelector('.hero-desc');
-    const heroImage = document.querySelector('.hero-image-container');
+    // Get all animation elements
+    const navElements = [
+        document.querySelector('.logo'),
+        ...document.querySelectorAll('.nav-link'),
+        document.querySelector('.settings-btn'),
+        document.querySelector('.hamburger')
+    ].filter(Boolean); // Remove null elements
 
-    // Sophisticated easing curve for smooth, natural movement
-    const easeOutBack = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
-    const easeOutCustom = 'cubic-bezier(0.22, 1, 0.36, 1)';
+    const heroElements = {
+        title: document.querySelector('.hero-title'),
+        dates: document.querySelector('.hero-dates'),
+        desc: document.querySelector('.hero-desc'),
+        image: document.querySelector('.hero-image-container')
+    };
 
-    heroTitle.style.opacity = '0';
-    heroDates.style.opacity = '0';
-    heroDesc.style.opacity = '0';
-    heroImage.style.opacity = '0';
+    // Start nav animations with stagger
+    staggerAnimate(navElements, 'animate', 0, ANIMATION_TIMING.navStagger);
 
-    // Staggered, flowing animations
-    heroTitle.style.animation = `slideInLeft 1.2s ${easeOutBack} 0.3s forwards`;
-    heroDates.style.animation = `slideInLeft 1s ${easeOutCustom} 0.5s forwards`;
-    heroDesc.style.animation = `slideInLeft 1s ${easeOutCustom} 0.7s forwards`;
-    heroImage.style.animation = `slideInRight 1.4s ${easeOutCustom} 0.4s forwards`;
+    // Prepare hero elements
+    Object.values(heroElements).forEach(el => {
+        if (el) {
+            el.style.opacity = '0';
+            el.style.willChange = 'transform, opacity';
+        }
+    });
+
+    // Define hero animations
+    const heroAnimations = [
+        { el: heroElements.title, animation: `slideInLeft 1.2s ${EASINGS.outBack} forwards` },
+        { el: heroElements.dates, animation: `slideInLeft 1s ${EASINGS.outCustom} forwards` },
+        { el: heroElements.desc, animation: `slideInLeft 1s ${EASINGS.outCustom} forwards` },
+        { el: heroElements.image, animation: `slideInRight 1.4s ${EASINGS.outCustom} forwards` }
+    ];
+
+    // Start hero animations with stagger
+    heroAnimations.forEach(({ el, animation }, i) => {
+        if (el) {
+            setTimeout(() => {
+                el.style.animation = animation;
+            }, ANIMATION_TIMING.heroDelay + (i * ANIMATION_TIMING.heroStagger));
+        }
+    });
+
+    // Cleanup will-change after animations complete
+    setTimeout(() => {
+        Object.values(heroElements).forEach(el => {
+            if (el) el.style.willChange = 'auto';
+        });
+    }, ANIMATION_TIMING.heroDelay + (heroAnimations.length * ANIMATION_TIMING.heroStagger) + 1500);
 }
 
-// Handle loader timing
+// Handle loader timing and initial animations
 document.addEventListener('DOMContentLoaded', () => {
+    // Initially hide the hamburger to prevent flash
+    const hamburger = document.querySelector('.hamburger');
+    if (hamburger) {
+        hamburger.style.opacity = '0';
+        hamburger.style.visibility = 'hidden';
+    }
+
     const loader = document.querySelector('.loader');
-    if (loader) {
-        // Shorter, more dynamic loading experience
+    if (!loader) return;
+
+    // Track when content is ready
+    const contentLoadTime = Date.now();
+    const minimumLoaderTime = ANIMATION_TIMING.loaderMinDisplay;
+    
+    // Function to start animations
+    const startAnimationsSequence = () => {
+        // Ensure minimum loader display time
+        const timeElapsed = Date.now() - contentLoadTime;
+        const remainingLoaderTime = Math.max(0, minimumLoaderTime - timeElapsed);
+        
         setTimeout(() => {
+            // Add hidden class to start fade out
             loader.classList.add('hidden');
             
-            // Sequential navbar animations
-            const elements = [
-                document.querySelector('.logo'),
-                ...document.querySelectorAll('.nav-link'),
-                document.querySelector('.settings-btn'),
-                document.querySelector('.hamburger')
-            ];
+            // After loader starts fading, prepare hamburger
+            if (hamburger) {
+                hamburger.style.visibility = 'visible';
+                hamburger.style.opacity = '1';
+                hamburger.style.transition = 'opacity 0.3s ease-in-out';
+            }
             
-            // Add animate class to each element
-            elements.forEach(element => {
-                if (element) element.classList.add('animate');
-            });
+            // Start page animations after loader fade
+            setTimeout(() => {
+                startPageAnimations();
+                
+                // Remove loader from DOM after all animations
+                setTimeout(() => {
+                    loader.remove();
+                }, 1000);
+            }, ANIMATION_TIMING.loaderFadeOut);
             
-            // Slightly reduced wait time for smoother transition
-            setTimeout(startPageAnimations, 600); // Reduced wait time for loader fade out
-        }, 1200); // Reduced initial wait time for a snappier feel
-    }
+        }, remainingLoaderTime);
+    };
+
+    // Handle images loading
+    const preloadHeroImages = () => {
+        const heroImages = document.querySelectorAll('.hero-image');
+        let loadedImages = 0;
+        const totalImages = heroImages.length;
+
+        const checkAllLoaded = () => {
+            loadedImages++;
+            if (loadedImages === totalImages) {
+                startAnimationsSequence();
+            }
+        };
+
+        heroImages.forEach(img => {
+            if (img.complete) {
+                checkAllLoaded();
+            } else {
+                img.onload = checkAllLoaded;
+                img.onerror = checkAllLoaded; // Count errors as loaded to prevent hanging
+            }
+        });
+
+        // Fallback in case some images fail to load
+        setTimeout(startAnimationsSequence, 3000);
+    };
+
+    preloadHeroImages();
 });
 
 // -------------------------
@@ -66,9 +222,10 @@ class ImageGalleryViewer {
         this.currentIndex = 0;
         this.images = [];
         this.isOpen = false;
-        this.setupEventListeners();
         this.touchStartX = 0;
         this.touchEndX = 0;
+        this.isDragging = false;
+        this.setupEventListeners();
     }
 
     createGalleryDOM() {
@@ -96,9 +253,65 @@ class ImageGalleryViewer {
         // Close button
         this.element.querySelector('.gallery-close').addEventListener('click', () => this.close());
 
+        // Get the image container for both click and touch events
+        const imageContainer = this.element.querySelector('.gallery-image-container');
+
         // Navigation buttons
-        this.element.querySelector('.gallery-nav.prev').addEventListener('click', () => this.prev());
-        this.element.querySelector('.gallery-nav.next').addEventListener('click', () => this.next());
+        const prevButton = this.element.querySelector('.gallery-nav.prev');
+        const nextButton = this.element.querySelector('.gallery-nav.next');
+        
+        // Prevent clicks on navigation buttons from bubbling up
+        prevButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.isOpen) return;
+            this.prev();
+        });
+        
+        nextButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.isOpen) return;
+            this.next();
+        });
+
+        // Touch event handling
+        imageContainer.addEventListener('touchstart', (e) => {
+            if (!this.isOpen) return;
+            this.touchStartX = e.touches[0].clientX;
+            this.isDragging = true;
+        }, { passive: true });
+
+        imageContainer.addEventListener('touchmove', (e) => {
+            if (!this.isDragging || !this.isOpen) return;
+            
+            this.touchEndX = e.touches[0].clientX;
+            const diffX = this.touchEndX - this.touchStartX;
+            
+            // Prevent scrolling while swiping
+            if (Math.abs(diffX) > 10) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        imageContainer.addEventListener('touchend', (e) => {
+            if (!this.isDragging || !this.isOpen) return;
+            
+            const diffX = this.touchEndX - this.touchStartX;
+            const threshold = window.innerWidth * 0.15; // 15% of screen width
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    this.prev();
+                } else {
+                    this.next();
+                }
+            }
+            
+            this.isDragging = false;
+            this.touchStartX = 0;
+            this.touchEndX = 0;
+        }, { passive: true });
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
@@ -117,43 +330,16 @@ class ImageGalleryViewer {
             }
         });
 
-        // Touch events for swipe
-        this.element.addEventListener('touchstart', (e) => {
-            this.touchStartX = e.touches[0].clientX;
+        // Prevent any clicks on the image or image container from triggering navigation
+        imageContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
 
-        this.element.addEventListener('touchmove', (e) => {
-            if (!this.isOpen) return;
-            
-            e.preventDefault();
-            const touchX = e.touches[0].clientX;
-            const diff = this.touchStartX - touchX;
-            
-            // Add visual feedback of swipe
-            this.imageElement.style.transform = `translateX(${-diff}px)`;
-        });
-
-        this.element.addEventListener('touchend', (e) => {
-            if (!this.isOpen) return;
-            
-            const diff = this.touchStartX - this.touchEndX;
-            const threshold = window.innerWidth * 0.2; // 20% of screen width
-            
-            // Reset transform
-            this.imageElement.style.transform = '';
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) {
-                    this.next();
-                } else {
-                    this.prev();
-                }
-            }
-        });
-
-        // Close on background click
+        // Close only when clicking the dark backdrop
         this.element.addEventListener('click', (e) => {
-            if (e.target === this.element) this.close();
+            if (e.target === this.element) {
+                this.close();
+            }
         });
     }
 
@@ -223,30 +409,80 @@ class ImageGalleryViewer {
         await this.updateImage();
     }
 
-    async updateImage() {
+    async updateImage(direction = null) {
         const current = this.images[this.currentIndex];
-        this.titleElement.textContent = current.title;
-        
-        // Start loading animation
-        this.imageElement.style.opacity = '0';
+        if (!current) return;
+
+        // Update title with fade
+        this.titleElement.style.opacity = '0';
+        setTimeout(() => {
+            this.titleElement.textContent = current.title;
+            this.titleElement.style.opacity = '1';
+        }, 150);
         
         try {
+            // Optimize animations with will-change
+            this.imageElement.style.willChange = 'transform, opacity';
+            
+            // Set initial position
+            const initialTransform = direction ? 
+                `translateX(${direction === 'prev' ? '-50px' : '50px'}) scale(0.95)` :
+                'translateX(0) scale(1)';
+                
+            // Apply initial state
+            Object.assign(this.imageElement.style, {
+                transform: initialTransform,
+                opacity: '0',
+                transition: 'none'
+            });
+            
+            // Load image
             await this.loadImage(current.src, current.title);
+            
+            // Apply GPU-accelerated transition
+            requestAnimationFrame(() => {
+                Object.assign(this.imageElement.style, {
+                    transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transform: 'translateX(0) scale(1)',
+                    opacity: '1'
+                });
+            });
+            
+            // Update nav buttons with fade
+            const [prevButton, nextButton] = ['prev', 'next'].map(
+                dir => this.element.querySelector(`.gallery-nav.${dir}`)
+            );
+            
+            [prevButton, nextButton].forEach(button => {
+                if (button) {
+                    button.style.opacity = '1';
+                    button.style.pointerEvents = 'auto';
+                }
+            });
+            
+            // Cleanup will-change after animation
+            setTimeout(() => {
+                this.imageElement.style.willChange = 'auto';
+            }, 700);
+            
         } catch (error) {
             console.error('Failed to load image:', error);
+            // Show error state to user
+            this.titleElement.textContent = 'Error loading image';
+            this.titleElement.style.color = 'var(--error-color, #ff5555)';
         }
     }
 
     async next() {
         if (!this.isOpen) return;
         this.currentIndex = (this.currentIndex + 1) % this.images.length;
-        await this.updateImage();
+        await this.updateImage('next');
     }
 
     async prev() {
         if (!this.isOpen) return;
         this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-        await this.updateImage();
+        await this.updateImage('prev');
     }
 
     close() {
@@ -254,12 +490,17 @@ class ImageGalleryViewer {
         this.isOpen = false;
         this.element.classList.remove('active');
         
-        // Restore scrolling and position
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.top = '';
-        window.scrollTo(0, this.scrollY);
+        // Restore scrolling and position smoothly
+        requestAnimationFrame(() => {
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            window.scrollTo({
+                top: this.scrollY,
+                behavior: 'instant'
+            });
+        });
     }
 }
 
@@ -365,16 +606,16 @@ const artWikiLinks = {
     const iconContainer = document.createElement('div');
     iconContainer.className = 'ref-icon-container';
     
-    // Arrow SVG
+    // Arrow SVG - Increased size for better touch target
     const arrowSvg = `
-        <svg class="ref-icon arrow" viewBox="0 0 24 24" width="24" height="24">
+        <svg class="ref-icon arrow" viewBox="0 0 24 24" width="32" height="32">
             <path d="M7 7h8.586L5.293 17.293l1.414 1.414L17 8.414V17h2V5H7v2z" fill="currentColor"/>
         </svg>
     `;
     
-    // World SVG
+    // World SVG - Increased size for better touch target
     const worldSvg = `
-        <svg class="ref-icon world" viewBox="0 0 24 24" width="24" height="24">
+        <svg class="ref-icon world" viewBox="0 0 24 24" width="32" height="32">
             <g fill="none" stroke="currentColor" stroke-width="1.5">
                 <circle cx="12" cy="12" r="9" />
                 <path d="M12 3a9 9 0 0 1 9 9M3 12a9 9 0 0 1 9-9" />
@@ -390,11 +631,39 @@ const artWikiLinks = {
     iconContainer.innerHTML = arrowSvg + worldSvg;
     card.appendChild(iconContainer);
     
-    // Make the container clickable
-    iconContainer.addEventListener('click', (e) => {
+    // Add invisible touch target extender
+    const touchTarget = document.createElement('div');
+    touchTarget.className = 'ref-touch-target';
+    touchTarget.style.cssText = `
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+    `;
+    iconContainer.appendChild(touchTarget);
+    
+    // Improved touch/click handling
+    const handleInteraction = (e) => {
         e.stopPropagation(); // Prevent triggering the card's click event
-        window.open(link, '_blank', 'noopener');
-    });
+        e.preventDefault();
+        
+        // Add feedback for touch devices
+        iconContainer.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            iconContainer.style.transform = '';
+            window.open(link, '_blank', 'noopener');
+        }, 150);
+    };
+    
+    // Handle both touch and click events
+    touchTarget.addEventListener('touchend', handleInteraction, { passive: false });
+    touchTarget.addEventListener('click', handleInteraction);
+    
+    // Prevent card click when touching icon area
+    iconContainer.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    iconContainer.addEventListener('touchend', e => e.stopPropagation(), { passive: true });
 }
 
 // Add reference links to art and inventions cards
@@ -663,12 +932,14 @@ let currentLang = detectBrowserLanguage();
 // -------------------------
 function initImageCarousel() {
     const images = document.querySelectorAll('.hero-image');
-    if (images.length <= 1) return; // No carousel needed for single image
+    if (images.length <= 1) return;
     
     let currentIndex = 0;
     let isTransitioning = false;
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
     
-    // Preload all images
     function preloadImages() {
         images.forEach(img => {
             if (img.src) {
@@ -678,64 +949,94 @@ function initImageCarousel() {
         });
     }
     
-    // Initialize the carousel state
     function initCarousel() {
         images.forEach((img, index) => {
-            img.style.zIndex = images.length - index; // Stack images properly
+            img.style.zIndex = images.length - index;
             img.classList.toggle('active', index === 0);
+            img.style.transform = 'translate(-50%, -50%) scale(1)';
+            img.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
         });
     }
     
-    function nextImage() {
+    function updateCarousel(direction) {
         if (isTransitioning) return;
         isTransitioning = true;
         
-        // Current image
         const currentImg = images[currentIndex];
-        currentImg.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        currentImg.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
         currentImg.classList.remove('active');
         
-        // Next image
-        currentIndex = (currentIndex + 1) % images.length;
-        const nextImg = images[currentIndex];
+        if (direction === 'next') {
+            currentIndex = (currentIndex + 1) % images.length;
+        } else {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+        }
         
-        // Update z-index for proper stacking
+        const nextImg = images[currentIndex];
         currentImg.style.zIndex = 1;
         nextImg.style.zIndex = 2;
         
-        // Trigger transition with proper timing
         requestAnimationFrame(() => {
             nextImg.classList.add('active');
-            
-            // Reset after transition
             setTimeout(() => {
                 isTransitioning = false;
                 images.forEach((img, idx) => {
                     img.style.zIndex = images.length - ((idx - currentIndex + images.length) % images.length);
                 });
-            }, 1000); // Increased transition time for smoothness
+            }, 600);
         });
     }
     
-    // Initialize
+    function handleTouchStart(e) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        clearInterval(intervalId);
+    }
+    
+    function handleTouchMove(e) {
+        if (!isDragging) return;
+        
+        currentX = e.touches[0].clientX;
+        const diffX = currentX - startX;
+        const threshold = window.innerWidth * 0.15;
+        
+        if (Math.abs(diffX) > threshold) {
+            isDragging = false;
+            if (diffX > 0) {
+                updateCarousel('prev');
+            } else {
+                updateCarousel('next');
+            }
+            startX = 0;
+        }
+    }
+    
+    function handleTouchEnd() {
+        isDragging = false;
+        startX = 0;
+        restartInterval();
+    }
+    
+    function restartInterval() {
+        clearInterval(intervalId);
+        intervalId = setInterval(() => updateCarousel('next'), 7000);
+    }
+    
     preloadImages();
     initCarousel();
     
-    // Start the carousel with a consistent interval
-    let intervalId = setInterval(nextImage, 7000); // Change image every 7 seconds
-    
-    // Add hover pause functionality
+    // Touch events for swipe
     const container = document.querySelector('.hero-image-container');
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
     
-    container.addEventListener('mouseenter', () => {
-        clearInterval(intervalId);
-    });
+    // Mouse hover pause
+    container.addEventListener('mouseenter', () => clearInterval(intervalId));
+    container.addEventListener('mouseleave', restartInterval);
     
-    container.addEventListener('mouseleave', () => {
-        // Clear any existing interval first to prevent multiple intervals
-        clearInterval(intervalId);
-        intervalId = setInterval(nextImage, 7000);
-    });
+    // Initial interval
+    let intervalId = setInterval(() => updateCarousel('next'), 7000);
 }
 
 // -------------------------
@@ -914,39 +1215,72 @@ updateContent(currentLang);
 // set active theme (UI)
 applyThemeUI(initialTheme);
 
-// update navbar look on scroll
-function updateNavbarBackground() {
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
-}
-window.addEventListener('scroll', updateNavbarBackground);
+// Optimized scroll handler
+const updateNavbarBackground = throttle(() => {
+    rafPromise().then(() => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+}, 100); // Throttle to max 10 updates per second
+
+// Register scroll listener with cleanup
+window.addEventListener('scroll', updateNavbarBackground, { passive: true });
+registerCleanup(() => window.removeEventListener('scroll', updateNavbarBackground));
+
+// Mobile menu state management
+const mobileMenuState = {
+    isAnimating: false,
+    isOpen: false
+};
 
 // Mobile hamburger menu toggle with improved state management
 function toggleMobileMenu() {
+    if (mobileMenuState.isAnimating) return;
+    mobileMenuState.isAnimating = true;
+    
     const isActive = hamburger.classList.contains('active');
     
-    // Toggle classes with proper state management
-    hamburger.classList.toggle('active');
-    mobileMenu.classList.toggle('active');
-    
-    // Update ARIA attributes for accessibility
-    hamburger.setAttribute('aria-expanded', !isActive);
-    mobileMenu.setAttribute('aria-hidden', isActive);
-    
-    // Prevent body scroll when mobile menu is open
-    document.body.style.overflow = !isActive ? 'hidden' : '';
-    
-    // If closing the menu, ensure mobile menu items reset their animation state
-    if (isActive) {
-        const menuItems = mobileMenu.querySelectorAll('.nav-link');
-        menuItems.forEach(item => {
-            item.style.animation = 'none';
-            item.offsetHeight; // Force reflow
-            item.style.animation = '';
-        });
+    // Prepare elements for animation
+    if (!isActive) {
+        mobileMenu.style.display = 'flex';
+        mobileMenu.style.willChange = 'opacity, transform';
     }
+    
+    // Toggle classes with proper state management
+    requestAnimationFrame(() => {
+        hamburger.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        
+        // Update ARIA attributes for accessibility
+        hamburger.setAttribute('aria-expanded', !isActive);
+        mobileMenu.setAttribute('aria-hidden', isActive);
+        
+        // Prevent body scroll when mobile menu is open
+        document.body.style.overflow = !isActive ? 'hidden' : '';
+        
+        // Reset animation state if closing
+        if (isActive) {
+            const menuItems = mobileMenu.querySelectorAll('.nav-link');
+            menuItems.forEach(item => {
+                item.style.animation = 'none';
+                item.offsetHeight; // Force reflow
+                item.style.animation = '';
+            });
+        }
+        
+        // Cleanup after animation
+        setTimeout(() => {
+            if (isActive) {
+                mobileMenu.style.display = 'none';
+            }
+            mobileMenu.style.willChange = 'auto';
+            mobileMenuState.isAnimating = false;
+        }, 300); // Match transition duration
+    });
 }
 
+// Add event listener with proper cleanup
 hamburger.addEventListener('click', toggleMobileMenu);
+registerCleanup(() => hamburger.removeEventListener('click', toggleMobileMenu));
 
 // Close mobile menu when clicking on a link with proper animation reset
 document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
@@ -1102,14 +1436,24 @@ document.querySelectorAll('.section-title, .content-card, .timeline-item').forEa
     });
 })();
 
-// Close mobile menu when window is resized to desktop size with debouncing
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 968 && mobileMenu.classList.contains('active')) {
-            // Properly close the menu using the toggle function
-            toggleMobileMenu();
-        }
-    }, 250); // Debounce resize events
-});
+// Handle responsive layout changes
+const handleResize = debounce(() => {
+    if (window.innerWidth > 968 && mobileMenu.classList.contains('active')) {
+        toggleMobileMenu();
+    }
+    
+    // Optimize animations based on device capability
+    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.documentElement.classList.toggle('reduce-motion', isReducedMotion);
+    
+    // Update touch behavior based on device type
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    document.documentElement.classList.toggle('touch-device', isTouchDevice);
+}, 250);
+
+// Add resize listener with cleanup
+window.addEventListener('resize', handleResize, { passive: true });
+registerCleanup(() => window.removeEventListener('resize', handleResize));
+
+// Initial device capability check
+handleResize();
