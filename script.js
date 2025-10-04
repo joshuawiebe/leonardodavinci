@@ -519,6 +519,28 @@ function getImagesFromContainer(container) {
 // Create and initialize gallery viewer
 const galleryViewer = new ImageGalleryViewer();
 
+// Initialize cards with background images
+function initializeCards() {
+    // Set up art card backgrounds
+    document.querySelectorAll('#art .content-card').forEach(card => {
+        const imageKey = card.dataset.image;
+        if (imageKey) {
+            card.style.backgroundImage = `url('./images/cards/art/${imageKey}.jpg')`;
+        }
+    });
+
+    // Set up invention card backgrounds
+    document.querySelectorAll('#inventions .content-card').forEach(card => {
+        const images = card.dataset.images ? JSON.parse(card.dataset.images) : [card.dataset.image];
+        if (images && images.length > 0) {
+            card.style.backgroundImage = `url('./images/cards/inventions/${images[0]}')`;
+        }
+    });
+}
+
+// Initialize cards when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeCards);
+
 // Initialize click handlers for gallery
 document.addEventListener('DOMContentLoaded', () => {
     // Hero section images

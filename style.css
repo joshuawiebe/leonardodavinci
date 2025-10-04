@@ -300,10 +300,15 @@ html:not([data-theme="dark"]) .nav.scrolled {
     }
 }
 
-.hamburger.animate {
-    animation: fadeScale 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards;
+.hamburger {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease, transform 0.4s var(--ease-out-expo);
+}
+
+.nav.loaded .hamburger {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .hamburger span {
@@ -831,6 +836,15 @@ html:not([data-theme="dark"]) .lang-option.active:hover {
     opacity: 0;
     transform: translateY(40px);
     position: relative;
+    text-align: center;
+}
+
+@media (max-width: 968px) {
+    .section-title {
+        text-align: left;
+        font-size: clamp(2rem, 5vw, 3rem);
+        margin-bottom: 3rem;
+    }
 }
 
 .section-title::after {
@@ -865,6 +879,13 @@ html:not([data-theme="dark"]) .lang-option.active:hover {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 4px 30px var(--shadow);
+    min-height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .content-card:before {
@@ -886,9 +907,23 @@ html:not([data-theme="dark"]) .lang-option.active:hover {
 .card-title, .card-text {
     position: relative;
     z-index: 1;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .content-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+    z-index: 0;
+    transition: opacity 0.3s ease;
+}
+
+.content-card::after {
     content: '';
     position: absolute;
     top: 0;
@@ -898,11 +933,17 @@ html:not([data-theme="dark"]) .lang-option.active:hover {
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 2;
 }
 
 .content-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(1.02);
     box-shadow: 0 20px 40px -15px var(--shadow);
+}
+
+.content-card:hover::before {
+    opacity: 0.8;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
 }
 
 .content-card:hover::before {
@@ -911,16 +952,38 @@ html:not([data-theme="dark"]) .lang-option.active:hover {
 
 .card-title {
     font-size: 1.4rem;
-    font-weight: 400;
+    font-weight: 300;
     margin-bottom: 1rem;
-    color: var(--accent);
-    letter-spacing: -0.01em;
+    color: white;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.card-title::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 2rem;
+    height: 1px;
+    background: white;
+    opacity: 0.6;
+    transition: width 0.3s ease;
+}
+
+.content-card:hover .card-title::after {
+    width: 4rem;
 }
 
 .card-text {
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.7;
     font-size: 0.95rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
 }
 
 /* Timeline with modern styling */
@@ -1681,6 +1744,11 @@ html {
 
 /* Selection styling */
 ::selection {
-    background: var(--accent);
-    color: var(--bg);
+    background: rgba(26, 26, 26, 0.15);
+    color: inherit;
+}
+
+[data-theme="dark"] ::selection {
+    background: rgba(255, 255, 255, 0.15);
+    color: inherit;
 }
